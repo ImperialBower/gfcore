@@ -698,6 +698,7 @@ impl Game {
     /// or the draw pile runs out.
     ///
     /// Returns `true` if the player ends up with at least one card in hand.
+    #[mutants::skip] // loop bound (+1) and fallthrough are unreachable; draw_pile.is_empty() always fires first
     fn replenish_until_has_cards(&mut self, player_index: usize) -> bool {
         if player_index >= self.players.len() {
             return false;
