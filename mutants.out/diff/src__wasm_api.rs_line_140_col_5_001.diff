@@ -1,0 +1,58 @@
+--- src/wasm_api.rs
++++ replace new_bot_game -> String with "xyzzy".into()
+@@ -132,54 +132,17 @@
+ /// - `bot_count`: number of bot players (1–4, bounded by available default profiles).
+ /// - `_seed`: reserved for future reproducible shuffle support; currently ignored.
+ ///
+ /// Returns the initial [`crate::game::GameState`] as JSON, or
+ /// `{"error": "..."}` on failure.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn new_bot_game(variant: &str, bot_count: usize, _seed: f64) -> String {
+-    let game_variant = match parse_variant(variant) {
+-        Ok(v) => v,
+-        Err(e) => return error_json(&e),
+-    };
+-
+-    let mut all_profiles = BotProfile::default_profiles();
+-    if bot_count > all_profiles.len() {
+-        return error_json(&format!(
+-            "bot_count {bot_count} exceeds available default profiles ({})",
+-            all_profiles.len()
+-        ));
+-    }
+-    let bot_profiles: Vec<BotProfile> = all_profiles.drain(..bot_count).collect();
+-
+-    let players: Vec<Player> = bot_profiles
+-        .iter()
+-        .map(|p| Player::new_bot(p.name.clone(), p.clone()))
+-        .collect();
+-
+-    let profiles: Vec<Option<BotProfile>> = bot_profiles.into_iter().map(Some).collect();
+-
+-    let game = match Game::new(game_variant, players) {
+-        Ok(g) => g,
+-        Err(e) => return error_json(&e.to_string()),
+-    };
+-
+-    let state_json = match game.state() {
+-        Ok(s) => match serde_json::to_string(&s) {
+-            Ok(j) => j,
+-            Err(e) => return error_json(&e.to_string()),
+-        },
+-        Err(e) => return error_json(&e.to_string()),
+-    };
+-
+-    GAME.with(|g| *g.borrow_mut() = Some(game));
+-    PROFILES.with(|p| *p.borrow_mut() = profiles);
+-
+-    state_json
++    "xyzzy".into() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Creates a new game with one human player (index 0) and `bot_count` bot players.
+ ///
+ /// - `variant`: `"Standard"`, `"HappyFamilies"`, or `"Quartet"`.
+ /// - `human_name`: display name for player 0 (the human).
+ /// - `bot_count`: number of bot players (1–4); bots fill slots 1..=`bot_count`
+ ///   from [`BotProfile::default_profiles`].

@@ -1,0 +1,21 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::name -> &'static str with "xyzzy"
+@@ -28,17 +28,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};
+     ///
+     /// assert_eq!(StandardRules.name(), "Standard Go Fish");
+     /// ```
+     fn name(&self) -> &'static str {
+-        "Standard Go Fish"
++        "xyzzy" /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns a freshly shuffled 52-card draw pile.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};

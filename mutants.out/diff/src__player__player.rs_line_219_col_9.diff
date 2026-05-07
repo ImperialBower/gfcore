@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::book_count -> usize with 0
+@@ -211,17 +211,17 @@
+     ///     FrenchBasicCard::ACE_HEARTS,
+     ///     FrenchBasicCard::ACE_DIAMONDS,
+     ///     FrenchBasicCard::ACE_CLUBS,
+     /// ]));
+     /// assert_eq!(player.book_count(), 1);
+     /// ```
+     #[must_use]
+     pub fn book_count(&self) -> usize {
+-        self.books.len()
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the rank index string of each completed book, in collection order.
+     ///
+     /// Each entry is the `index` of the first card in the book pile
+     /// (e.g., `"A"` for Aces, `"7"` for Sevens).
+     /// The returned `Vec` is always the same length as `book_count()`.
+     /// An empty-pile book (which should not occur in normal play) produces `""`.

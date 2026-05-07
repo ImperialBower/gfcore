@@ -1,0 +1,21 @@
+--- src/rules/happy_families.rs
++++ replace <impl GoFishRules for HappyFamiliesRules>::name -> &'static str with ""
+@@ -146,17 +146,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};
+     ///
+     /// assert_eq!(HappyFamiliesRules.name(), "Happy Families");
+     /// ```
+     fn name(&self) -> &'static str {
+-        "Happy Families"
++        "" /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns a freshly shuffled 44-card draw pile.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};

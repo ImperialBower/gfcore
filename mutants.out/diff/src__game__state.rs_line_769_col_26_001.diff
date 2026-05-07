@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace + with * in Game::advance_turn
+@@ -761,17 +761,17 @@
+                 self.current_player = next;
+                 #[cfg(feature = "history")]
+                 {
+                     self.pending_turn_player = next;
+                 }
+                 return;
+             }
+             // This player is out and so is the pile — skip them.
+-            next = (next + 1) % count;
++            next = (next * /* ~ changed by cargo-mutants ~ */ 1) % count;
+         }
+ 
+         // Everyone is out and the pile is empty.  Set current_player to the
+         // slot after the one that just acted; check_win_condition will end
+         // the game momentarily.
+         self.current_player = next;
+         #[cfg(feature = "history")]
+         {

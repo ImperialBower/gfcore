@@ -1,0 +1,114 @@
+--- src/game/state.rs
++++ replace Game::handle_ask -> Result<GameEvent, GfError> with Ok(Default::default())
+@@ -482,110 +482,17 @@
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — action handlers
+     // -----------------------------------------------------------------------
+ 
+     /// Handles a `PlayerAction::Ask`.
+     fn handle_ask(&mut self, target: usize, rank: Pip) -> Result<GameEvent, GfError> {
+-        if self.phase != GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
+-            return Err(GfError::OutOfTurn);
+-        }
+-
+-        let cp = self.current_player;
+-
+-        // Validate target.
+-        if target == cp || target >= self.players.len() {
+-            return Err(GfError::InvalidTarget);
+-        }
+-
+-        // The asker must hold the requested rank.
+-        if !self.players[cp].has_rank(&rank) {
+-            return Err(GfError::InvalidAsk);
+-        }
+-
+-        // Record the ask in the public log before branching on Go-Fish/give.
+-        self.ask_log.push(AskEntry {
+-            asker: cp,
+-            rank: rank.index.to_string(),
+-        });
+-
+-        // Emit Asked event.
+-        let asked_event = GameEvent::Asked {
+-            asker: cp,
+-            target,
+-            rank: rank.index.to_string(),
+-        };
+-        self.last_event = Some(asked_event.clone());
+-        #[cfg(feature = "history")]
+-        self.push_event(&asked_event);
+-
+-        // Check whether target has matching cards.
+-        let transferred = self.players[target].give_cards_of_rank(&rank);
+-
+-        if transferred.is_empty() {
+-            // Go Fish.
+-            let event = GameEvent::GoFish { player: cp };
+-            self.last_event = Some(event.clone());
+-            #[cfg(feature = "history")]
+-            self.push_event(&event);
+-            self.phase = GamePhase::WaitingForDraw;
+-            self.last_asked_rank = Some(rank);
+-            return Ok(event);
+-        }
+-
+-        // Transfer cards.
+-        let count = transferred.len();
+-        for card in transferred {
+-            self.players[cp].receive_card(card);
+-        }
+-
+-        let gave_event = GameEvent::Gave {
+-            from: target,
+-            to: cp,
+-            rank: rank.index.to_string(),
+-            count,
+-        };
+-        self.last_event = Some(gave_event.clone());
+-        #[cfg(feature = "history")]
+-        self.push_event(&gave_event);
+-
+-        // Check for a completed book.
+-        let book_size = self.variant.rules().book_size();
+-        let last_event = if self.check_and_collect_book(cp, &rank, book_size) {
+-            let book_event = GameEvent::Book {
+-                player: cp,
+-                rank: rank.index.to_string(),
+-            };
+-            self.last_event = Some(book_event.clone());
+-            #[cfg(feature = "history")]
+-            self.push_event(&book_event);
+-            book_event
+-        } else {
+-            gave_event
+-        };
+-
+-        // Transition to BookCompleted if a book was just made; otherwise stay
+-        // on WaitingForAsk (same player keeps turn in both cases).
+-        self.phase = match &last_event {
+-            GameEvent::Book { .. } => GamePhase::BookCompleted,
+-            _ => GamePhase::WaitingForAsk,
+-        };
+-
+-        // If the current player's hand is now empty (all cards went into
+-        // a book), they cannot ask again — replenish or skip them.
+-        self.ensure_current_player_can_ask();
+-
+-        // Win-condition check (may overwrite phase to GameOver).
+-        if let Some(over_event) = self.check_win_condition() {
+-            return Ok(over_event);
+-        }
+-
+-        Ok(last_event)
++        Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Handles a `PlayerAction::Draw`.
+     fn handle_draw(&mut self) -> Result<GameEvent, GfError> {
+         if self.phase != GamePhase::WaitingForDraw {
+             return Err(GfError::OutOfTurn);
+         }
+ 

@@ -1,0 +1,21 @@
+--- src/bot/strategy/random.rs
++++ replace % with + in <impl BotStrategy for RandomStrategy>::decide
+@@ -93,17 +93,17 @@
+         #[allow(clippy::indexing_slicing)]
+         let rank = cards[card_index].rank;
+ 
+         // Build a list of valid (non-self) target indices.
+         let targets: Vec<usize> = (0..players.len()).filter(|&idx| idx != observer).collect();
+ 
+         let target = if targets.is_empty() {
+             // Degenerate case: only one player (should not happen in a real game).
+-            (observer + 1) % players.len().max(2)
++            (observer + 1) + /* ~ changed by cargo-mutants ~ */ players.len().max(2)
+         } else {
+             let pick = rng.random_range(0..targets.len());
+             targets[pick]
+         };
+ 
+         PlayerAction::Ask { target, rank }
+     }
+ }

@@ -1,0 +1,71 @@
+src/rules/mod.rs:203:9: replace <impl std::fmt::Debug for GameVariant>::fmt -> std::fmt::Result with Ok(Default::default())
+src/wasm_api.rs:47:5: replace wasm_init with ()
+src/wasm_api.rs:56:5: replace error_json -> String with String::new()
+src/wasm_api.rs:56:5: replace error_json -> String with "xyzzy".into()
+src/wasm_api.rs:61:5: replace parse_variant -> Result<GameVariant, String> with Ok(Default::default())
+src/wasm_api.rs:62:9: delete match arm "Standard" in parse_variant
+src/wasm_api.rs:63:9: delete match arm "HappyFamilies" in parse_variant
+src/wasm_api.rs:64:9: delete match arm "Quartet" in parse_variant
+src/wasm_api.rs:83:5: replace version -> String with String::new()
+src/wasm_api.rs:83:5: replace version -> String with "xyzzy".into()
+src/wasm_api.rs:98:5: replace new_game -> String with String::new()
+src/wasm_api.rs:98:5: replace new_game -> String with "xyzzy".into()
+src/wasm_api.rs:140:5: replace new_bot_game -> String with String::new()
+src/wasm_api.rs:140:5: replace new_bot_game -> String with "xyzzy".into()
+src/wasm_api.rs:146:18: replace > with == in new_bot_game
+src/wasm_api.rs:146:18: replace > with < in new_bot_game
+src/wasm_api.rs:146:18: replace > with >= in new_bot_game
+src/wasm_api.rs:201:5: replace new_human_vs_bots_game -> String with String::new()
+src/wasm_api.rs:201:5: replace new_human_vs_bots_game -> String with "xyzzy".into()
+src/wasm_api.rs:206:18: replace == with != in new_human_vs_bots_game
+src/wasm_api.rs:211:18: replace > with == in new_human_vs_bots_game
+src/wasm_api.rs:211:18: replace > with < in new_human_vs_bots_game
+src/wasm_api.rs:211:18: replace > with >= in new_human_vs_bots_game
+src/wasm_api.rs:258:5: replace act -> String with String::new()
+src/wasm_api.rs:258:5: replace act -> String with "xyzzy".into()
+src/wasm_api.rs:288:5: replace get_state -> String with String::new()
+src/wasm_api.rs:288:5: replace get_state -> String with "xyzzy".into()
+src/wasm_api.rs:313:5: replace step_bot -> String with String::new()
+src/wasm_api.rs:313:5: replace step_bot -> String with "xyzzy".into()
+src/wasm_api.rs:355:33: replace == with != in step_bot
+src/wasm_api.rs:402:5: replace get_game_yaml -> String with String::new()
+src/wasm_api.rs:402:5: replace get_game_yaml -> String with "xyzzy".into()
+src/wasm_api.rs:428:5: replace parse_game_collection -> String with String::new()
+src/wasm_api.rs:428:5: replace parse_game_collection -> String with "xyzzy".into()
+src/bot/profile.rs:53:9: replace <impl std::fmt::Debug for BotProfile>::fmt -> std::fmt::Result with Ok(Default::default())
+src/game/state.rs:570:13: delete match arm GameEvent::Book{..} in Game::handle_ask
+src/game/state.rs:637:34: replace == with != in Game::handle_draw
+src/game/state.rs:702:9: replace Game::replenish_until_has_cards -> bool with false
+src/game/state.rs:702:25: replace >= with < in Game::replenish_until_has_cards
+src/game/state.rs:708:46: replace + with * in Game::replenish_until_has_cards
+src/game/state.rs:723:9: delete ! in Game::replenish_until_has_cards
+src/game/state.rs:751:16: delete ! in Game::advance_turn
+src/game/state.rs:769:31: replace % with / in Game::advance_turn
+src/game/state.rs:769:31: replace % with + in Game::advance_turn
+src/game/state.rs:769:26: replace + with * in Game::advance_turn
+src/game/state.rs:791:23: replace != with == in Game::ensure_current_player_can_ask
+src/game/state.rs:797:16: delete ! in Game::ensure_current_player_can_ask
+src/game/state.rs:854:9: replace Game::collect_books_for_player with ()
+src/game/state.rs:877:9: replace Game::no_productive_ask_exists -> bool with true
+src/game/state.rs:914:43: replace && with || in Game::check_win_condition
+src/game/state.rs:916:12: delete ! in Game::check_win_condition
+src/game/state.rs:935:39: replace == with != in Game::check_win_condition
+src/game/state.rs:953:16: delete ! in Game::check_win_condition
+src/rules/happy_families.rs:96:9: replace <impl DeckedBase for HappyFamilies>::colors -> HashMap<Pip, Color> with HashMap::new()
+src/rules/happy_families.rs:104:9: replace <impl DeckedBase for HappyFamilies>::deck_name -> String with String::new()
+src/rules/happy_families.rs:104:9: replace <impl DeckedBase for HappyFamilies>::deck_name -> String with "xyzzy".into()
+src/rules/happy_families.rs:108:9: replace <impl DeckedBase for HappyFamilies>::fluent_deck_key -> String with String::new()
+src/rules/happy_families.rs:108:9: replace <impl DeckedBase for HappyFamilies>::fluent_deck_key -> String with "xyzzy".into()
+src/rules/quartet.rs:82:9: replace <impl DeckedBase for Quartet>::colors -> HashMap<Pip, Color> with HashMap::new()
+src/rules/quartet.rs:90:9: replace <impl DeckedBase for Quartet>::deck_name -> String with String::new()
+src/rules/quartet.rs:90:9: replace <impl DeckedBase for Quartet>::deck_name -> String with "xyzzy".into()
+src/rules/quartet.rs:94:9: replace <impl DeckedBase for Quartet>::fluent_deck_key -> String with String::new()
+src/rules/quartet.rs:94:9: replace <impl DeckedBase for Quartet>::fluent_deck_key -> String with "xyzzy".into()
+src/bot/strategy/basic.rs:137:40: replace % with / in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:137:40: replace % with + in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:137:35: replace + with - in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:137:35: replace + with * in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/random.rs:101:28: replace % with / in <impl BotStrategy for RandomStrategy>::decide
+src/bot/strategy/random.rs:101:28: replace % with + in <impl BotStrategy for RandomStrategy>::decide
+src/bot/strategy/random.rs:101:23: replace + with - in <impl BotStrategy for RandomStrategy>::decide
+src/bot/strategy/random.rs:101:23: replace + with * in <impl BotStrategy for RandomStrategy>::decide

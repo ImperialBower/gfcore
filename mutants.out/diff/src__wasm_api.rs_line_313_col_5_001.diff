@@ -1,0 +1,93 @@
+--- src/wasm_api.rs
++++ replace step_bot -> String with "xyzzy".into()
+@@ -305,89 +305,17 @@
+ /// Returns:
+ /// - `{"done":false,"event":<GameEvent JSON>}` after the bot acted.
+ /// - `{"done":true}` if it is not a bot's turn or the game is over.
+ /// - `{"error":"..."}` on failure.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn step_bot() -> String {
+     // Check game-over and current player index first.
+-    let (is_over, current_player) = GAME.with(|cell| {
+-        let borrow = cell.borrow();
+-        match borrow.as_ref() {
+-            None => (true, 0), // treat missing game as "done"
+-            Some(game) => (game.is_over(), game.current_player()),
+-        }
+-    });
+-
+-    if is_over {
+-        return "{\"done\":true}".to_string();
+-    }
+-
+-    // Check whether the current player has a bot profile.
+-    let profile_opt: Option<BotProfile> = PROFILES.with(|p| {
+-        let profiles = p.borrow();
+-        profiles.get(current_player).and_then(Clone::clone)
+-    });
+-
+-    let Some(profile) = profile_opt else {
+-        return "{\"done\":true}".to_string();
+-    };
+-
+-    // Get the current game state so the bot can see its hand and the ask log.
+-    let state_opt = GAME.with(|cell| {
+-        let borrow = cell.borrow();
+-        borrow.as_ref().and_then(|game| game.state().ok())
+-    });
+-
+-    let Some(state) = state_opt else {
+-        return error_json("no game in progress");
+-    };
+-
+-    // The bot's hand is visible in the observer-perspective view.
+-    let hand = match state.players.get(current_player) {
+-        None => return error_json("current_player index out of range"),
+-        Some(view) => match view.hand.clone() {
+-            None => return error_json("bot hand not visible in state"),
+-            Some(h) => h,
+-        },
+-    };
+-
+-    // In WaitingForDraw the bot must draw, not ask.
+-    let action = if state.phase == GamePhase::WaitingForDraw {
+-        PlayerAction::Draw
+-    } else {
+-        profile.decide(&hand, &state.players, &state.ask_log)
+-    };
+-
+-    // Apply the action.
+-    let event_json = GAME.with(|cell| {
+-        let mut borrow = cell.borrow_mut();
+-        match borrow.as_mut() {
+-            None => error_json("no game in progress"),
+-            Some(game) => match game.act(action) {
+-                Ok(event) => {
+-                    let json = match serde_json::to_string(&event) {
+-                        Ok(j) => j,
+-                        Err(e) => return error_json(&e.to_string()),
+-                    };
+-                    LAST_EVENT.with(|le| *le.borrow_mut() = Some(event));
+-                    json
+-                }
+-                Err(e) => error_json(&e.to_string()),
+-            },
+-        }
+-    });
+-
+-    // If the event_json itself is an error object, return it directly.
+-    if event_json.starts_with("{\"error\"") {
+-        return event_json;
+-    }
+-
+-    format!("{{\"done\":false,\"event\":{event_json}}}")
++    "xyzzy".into() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Returns the full game history as YAML.
+ ///
+ /// Returns `{"error":"..."}` if no game is in progress, the game is not yet
+ /// over, or the `history` feature is not enabled.
+ ///
+ /// # Examples (JavaScript)

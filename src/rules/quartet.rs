@@ -375,4 +375,19 @@ mod tests {
             .count();
         assert_eq!(seven_count, 4, "Quartet deck must contain four sevens");
     }
+
+    #[test]
+    fn test_deck_name_is_quartet() {
+        assert_eq!(Quartet::deck_name(), "Quartet");
+    }
+
+    #[test]
+    fn test_fluent_deck_key_is_non_empty() {
+        assert!(!Quartet::fluent_deck_key().is_empty());
+    }
+
+    #[test]
+    fn test_colors_is_non_empty() {
+        assert!(!Quartet::colors().is_empty());
+    }
 }

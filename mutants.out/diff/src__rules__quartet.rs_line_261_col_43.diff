@@ -1,0 +1,21 @@
+--- src/rules/quartet.rs
++++ replace == with != in <impl GoFishRules for QuartetRules>::is_book
+@@ -253,17 +253,17 @@
+     /// assert!(!QuartetRules.is_book(&not_book));
+     /// ```
+     fn is_book(&self, cards: &BasicPile) -> bool {
+         if cards.len() != self.book_size() {
+             return false;
+         }
+         #[allow(clippy::indexing_slicing)]
+         let first_rank = cards.v()[0].rank;
+-        cards.iter().all(|card| card.rank == first_rank)
++        cards.iter().all(|card| card.rank != /* ~ changed by cargo-mutants ~ */ first_rank)
+     }
+ }
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+ 
+     #[test]

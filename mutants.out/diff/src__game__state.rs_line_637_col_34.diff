@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace == with != in Game::handle_draw
+@@ -629,17 +629,17 @@
+             self.phase = GamePhase::WaitingForAsk;
+             self.ensure_current_player_can_ask();
+             if let Some(over_event) = self.check_win_condition() {
+                 return Ok(over_event);
+             }
+             return Ok(drew_event);
+         };
+ 
+-        let matched = asked_rank == Some(card.rank);
++        let matched = asked_rank != /* ~ changed by cargo-mutants ~ */ Some(card.rank);
+ 
+         self.players[cp].receive_card(card);
+ 
+         let drew_event = GameEvent::Drew {
+             player: cp,
+             matched,
+         };
+         self.last_event = Some(drew_event.clone());

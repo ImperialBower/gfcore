@@ -1,0 +1,21 @@
+--- src/rules/happy_families.rs
++++ replace <impl DeckedBase for HappyFamilies>::fluent_deck_key -> String with String::new()
+@@ -100,17 +100,17 @@
+         Self::DECK.to_vec()
+     }
+ 
+     fn deck_name() -> String {
+         "Happy Families".to_string()
+     }
+ 
+     fn fluent_deck_key() -> String {
+-        cardpack::prelude::FLUENT_KEY_BASE_NAME_FRENCH.to_string()
++        String::new() /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // HappyFamiliesRules (GoFishRules implementation)
+ // ---------------------------------------------------------------------------
+ 
+ /// Go Fish rules for the Happy Families variant.

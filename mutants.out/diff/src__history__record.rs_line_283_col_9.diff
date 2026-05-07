@@ -1,0 +1,21 @@
+--- src/history/record.rs
++++ replace GameCollection::is_empty -> bool with true
+@@ -275,17 +275,17 @@
+     /// ```
+     /// use gfcore::history::GameCollection;
+     ///
+     /// let col = GameCollection::new();
+     /// assert!(col.is_empty());
+     /// ```
+     #[must_use]
+     pub fn is_empty(&self) -> bool {
+-        self.0.is_empty()
++        true /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns an iterator over the records in this collection.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::history::{GameCollection, GameRecord};

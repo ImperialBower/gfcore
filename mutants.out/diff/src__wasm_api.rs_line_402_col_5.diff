@@ -1,0 +1,37 @@
+--- src/wasm_api.rs
++++ replace get_game_yaml -> String with String::new()
+@@ -394,33 +394,17 @@
+ ///
+ /// ```javascript
+ /// const yaml = get_game_yaml();
+ /// if (!yaml.startsWith('{"error"')) console.log(yaml);
+ /// ```
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn get_game_yaml() -> String {
+-    #[cfg(feature = "history")]
+-    {
+-        GAME.with(|cell| {
+-            let borrow = cell.borrow();
+-            match borrow.as_ref() {
+-                None => error_json("no game in progress"),
+-                Some(game) => match game.record().to_yaml() {
+-                    Ok(yaml) => yaml,
+-                    Err(e) => error_json(&e.to_string()),
+-                },
+-            }
+-        })
+-    }
+-    #[cfg(not(feature = "history"))]
+-    {
+-        error_json("history feature is not enabled")
+-    }
++    String::new() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Parses a YAML [`crate::history::GameCollection`] string and returns it as JSON.
+ ///
+ /// Requires the `history` feature.  Returns `{"error":"..."}` when the
+ /// feature is absent or when parsing fails.
+ #[must_use]
+ #[wasm_bindgen]

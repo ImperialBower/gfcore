@@ -1,0 +1,28 @@
+--- src/wasm_api.rs
++++ replace parse_game_collection -> String with String::new()
+@@ -420,24 +420,10 @@
+ 
+ /// Parses a YAML [`crate::history::GameCollection`] string and returns it as JSON.
+ ///
+ /// Requires the `history` feature.  Returns `{"error":"..."}` when the
+ /// feature is absent or when parsing fails.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn parse_game_collection(yaml: &str) -> String {
+-    #[cfg(feature = "history")]
+-    {
+-        match crate::history::GameCollection::from_yaml(yaml) {
+-            Ok(col) => match serde_json::to_string(&col) {
+-                Ok(j) => j,
+-                Err(e) => error_json(&e.to_string()),
+-            },
+-            Err(e) => error_json(&e.to_string()),
+-        }
+-    }
+-    #[cfg(not(feature = "history"))]
+-    {
+-        let _ = yaml;
+-        error_json("history feature is not enabled")
+-    }
++    String::new() /* ~ changed by cargo-mutants ~ */
+ }

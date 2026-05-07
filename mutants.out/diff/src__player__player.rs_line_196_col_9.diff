@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::add_book with ()
+@@ -188,17 +188,17 @@
+     ///     FrenchBasicCard::ACE_HEARTS,
+     ///     FrenchBasicCard::ACE_DIAMONDS,
+     ///     FrenchBasicCard::ACE_CLUBS,
+     /// ]);
+     /// player.add_book(book);
+     /// assert_eq!(player.book_count(), 1);
+     /// ```
+     pub fn add_book(&mut self, book: BasicPile) {
+-        self.books.push(book);
++        () /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the number of completed books this player holds.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use cardpack::prelude::{BasicPile, FrenchBasicCard};

@@ -1,0 +1,21 @@
+--- src/bot/strategy/basic.rs
++++ replace != with == in <impl BotStrategy for BasicStrategy>::decide
+@@ -121,17 +121,17 @@
+                 None => return PlayerAction::Draw,
+             }
+         };
+ 
+         // --- Target selection: most recent other-player entry in ask log ---
+         let target = ask_log
+             .iter()
+             .rev()
+-            .find(|entry| entry.asker != observer)
++            .find(|entry| entry.asker == /* ~ changed by cargo-mutants ~ */ observer)
+             .map_or_else(
+                 || {
+                     // Fall back: pick a random non-self player.
+                     let mut rng = rand::rng();
+                     let targets: Vec<usize> =
+                         (0..players.len()).filter(|&idx| idx != observer).collect();
+                     if targets.is_empty() {
+                         (observer + 1) % players.len().max(2)

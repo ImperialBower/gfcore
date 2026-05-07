@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ delete ! in Game::ensure_current_player_can_ask
+@@ -789,17 +789,17 @@
+     /// player's hand empty while the phase is `WaitingForAsk`.
+     fn ensure_current_player_can_ask(&mut self) {
+         if self.phase != GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
+             return;
+         }
+         let cp = self.current_player;
+         if self.players[cp].hand_is_empty() {
+             // Try to replenish.
+-            if !self.replenish_until_has_cards(cp) {
++            if  /* ~ changed by cargo-mutants ~ */self.replenish_until_has_cards(cp) {
+                 // Pile is empty and hand is empty — advance to someone who can
+                 // act (or everyone is out, ending the game).
+                 self.advance_turn();
+             }
+         }
+     }
+ 
+     // -----------------------------------------------------------------------

@@ -1,0 +1,42 @@
+--- src/wasm_api.rs
++++ replace act -> String with String::new()
+@@ -250,38 +250,17 @@
+ /// - `{"Ask":{"target":1,"rank":{"weight":12,"index":"A","value":0}}}` for an ask
+ /// - `"Draw"` for a draw
+ ///
+ /// Returns the resulting [`crate::game::GameEvent`] as JSON, or
+ /// `{"error": "..."}` on failure.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn act(action_json: &str) -> String {
+-    let action: crate::game::PlayerAction = match serde_json::from_str(action_json) {
+-        Ok(a) => a,
+-        Err(e) => return error_json(&format!("invalid action JSON: {e}")),
+-    };
+-
+-    GAME.with(|cell| {
+-        let mut borrow = cell.borrow_mut();
+-        match borrow.as_mut() {
+-            None => error_json("no game in progress"),
+-            Some(game) => match game.act(action) {
+-                Ok(event) => {
+-                    let json = match serde_json::to_string(&event) {
+-                        Ok(j) => j,
+-                        Err(e) => return error_json(&e.to_string()),
+-                    };
+-                    LAST_EVENT.with(|le| *le.borrow_mut() = Some(event));
+-                    json
+-                }
+-                Err(e) => error_json(&e.to_string()),
+-            },
+-        }
+-    })
++    String::new() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Returns the current [`crate::game::GameState`] as JSON.
+ ///
+ /// Returns `{"error": "no game in progress"}` if no game has been started.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn get_state() -> String {

@@ -1,0 +1,26 @@
+--- src/bot/profile.rs
++++ replace <impl std::fmt::Debug for BotProfile>::fmt -> std::fmt::Result with Ok(Default::default())
+@@ -45,22 +45,17 @@
+     /// The strategy used when [`BotProfile::decide`] is called.
+     strategy: Box<dyn BotStrategy>,
+     /// Which built-in strategy backs this profile (for [`Clone`] support).
+     kind: StrategyKind,
+ }
+ 
+ impl std::fmt::Debug for BotProfile {
+     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+-        formatter
+-            .debug_struct("BotProfile")
+-            .field("name", &self.name)
+-            .field("strategy", &"<dyn BotStrategy>")
+-            .field("kind", &self.kind)
+-            .finish()
++        Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ impl BotProfile {
+     /// Creates a profile backed by [`RandomStrategy`].
+     ///
+     /// # Examples
+     ///

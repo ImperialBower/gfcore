@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::receive_card with ()
+@@ -87,17 +87,17 @@
+     /// use cardpack::prelude::FrenchBasicCard;
+     /// use gfcore::prelude::Player;
+     ///
+     /// let mut player = Player::new("Carol");
+     /// player.receive_card(FrenchBasicCard::ACE_SPADES);
+     /// assert_eq!(player.hand_size(), 1);
+     /// ```
+     pub fn receive_card(&mut self, card: BasicCard) {
+-        self.hand.push(card);
++        () /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Removes and returns all cards of the given rank from this player's hand.
+     ///
+     /// Returns an empty [`BasicPile`] if the hand holds no card of that rank.
+     ///
+     /// # Examples
+     ///

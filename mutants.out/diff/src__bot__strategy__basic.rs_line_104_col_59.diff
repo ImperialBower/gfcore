@@ -1,0 +1,21 @@
+--- src/bot/strategy/basic.rs
++++ replace += with -= in <impl BotStrategy for BasicStrategy>::decide
+@@ -96,17 +96,17 @@
+ 
+         // --- Rank selection: highest count in hand, tie-broken by index desc ---
+         let rank = {
+             // Count occurrences of each unique rank.
+             let mut rank_counts: Vec<(cardpack::prelude::Pip, usize)> = {
+                 let mut counts: std::collections::HashMap<cardpack::prelude::Pip, usize> =
+                     std::collections::HashMap::new();
+                 for card in hand.v() {
+-                    *counts.entry(card.rank).or_insert(0) += 1;
++                    *counts.entry(card.rank).or_insert(0) -= /* ~ changed by cargo-mutants ~ */ 1;
+                 }
+                 counts.into_iter().collect()
+             };
+ 
+             // Sort by count descending, then by rank index string descending for
+             // stable tie-breaking without needing a numeric weight.
+             rank_counts.sort_by(|(rank_a, count_a), (rank_b, count_b)| {
+                 count_b

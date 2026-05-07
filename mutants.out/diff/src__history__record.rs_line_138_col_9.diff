@@ -1,0 +1,21 @@
+--- src/history/record.rs
++++ replace GameRecord::to_yaml -> Result<String, GfError> with Ok(String::new())
+@@ -130,17 +130,17 @@
+     /// use gfcore::history::GameRecord;
+     ///
+     /// let record = GameRecord::new("Standard", vec!["Alice".to_string(), "Bob".to_string()]);
+     /// let yaml = record.to_yaml().expect("serialization must succeed");
+     /// assert!(yaml.contains("Standard"));
+     /// assert!(yaml.contains("Alice"));
+     /// ```
+     pub fn to_yaml(&self) -> Result<String, GfError> {
+-        serde_norway::to_string(self).map_err(GfError::from)
++        Ok(String::new()) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Deserializes a [`GameRecord`] from a YAML string.
+     ///
+     /// # Errors
+     ///
+     /// Returns [`GfError::ParseError`] if the input is not valid YAML or does
+     /// not match the expected structure.

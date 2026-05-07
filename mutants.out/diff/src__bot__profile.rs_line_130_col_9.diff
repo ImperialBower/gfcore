@@ -1,0 +1,25 @@
+--- src/bot/profile.rs
++++ replace BotProfile::custom -> Self with Default::default()
+@@ -122,21 +122,17 @@
+     ///     }
+     /// }
+     ///
+     /// let profile = BotProfile::custom("Ace-Fanatic", Box::new(AlwaysAskAce));
+     /// assert_eq!(profile.name, "Ace-Fanatic");
+     /// ```
+     #[must_use]
+     pub fn custom(name: impl Into<String>, strategy: Box<dyn BotStrategy>) -> Self {
+-        Self {
+-            name: name.into(),
+-            strategy,
+-            kind: StrategyKind::Custom,
+-        }
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Asks the strategy to decide the bot's next action.
+     ///
+     /// `hand` must be non-empty (the game engine enforces this invariant before
+     /// calling into the bot layer).  `players` provides the current-player view
+     /// with `hand: Some(...)` for the bot.  `ask_log` contains all asks made
+     /// since game start.

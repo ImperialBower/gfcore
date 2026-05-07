@@ -1,0 +1,32 @@
+--- src/game/state.rs
++++ replace Game::ensure_current_player_can_ask with ()
+@@ -783,28 +783,17 @@
+     /// `WaitingForAsk`.  If their hand became empty (e.g., after completing a
+     /// book that used all remaining cards) and the pile is also empty, the
+     /// engine advances the turn.  If the pile is not empty it replenishes
+     /// their hand.
+     ///
+     /// Must be called after any state change that could leave the current
+     /// player's hand empty while the phase is `WaitingForAsk`.
+     fn ensure_current_player_can_ask(&mut self) {
+-        if self.phase != GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
+-            return;
+-        }
+-        let cp = self.current_player;
+-        if self.players[cp].hand_is_empty() {
+-            // Try to replenish.
+-            if !self.replenish_until_has_cards(cp) {
+-                // Pile is empty and hand is empty — advance to someone who can
+-                // act (or everyone is out, ending the game).
+-                self.advance_turn();
+-            }
+-        }
++        () /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — history recording
+     // -----------------------------------------------------------------------
+ 
+     /// Appends `event` to the pending turn's event list.
+     #[cfg(feature = "history")]

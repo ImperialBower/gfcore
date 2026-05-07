@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ delete ! in Game::record
+@@ -465,17 +465,17 @@
+     /// let record = game.record();
+     /// assert_eq!(record.variant, "Standard Go Fish");
+     /// assert_eq!(record.players, vec!["Alice", "Bob"]);
+     /// assert!(record.turns.is_empty());
+     /// ```
+     #[cfg(feature = "history")]
+     pub fn record(&self) -> GameRecord {
+         let mut record = self.history.clone();
+-        if !self.pending_turn_events.is_empty() {
++        if  /* ~ changed by cargo-mutants ~ */self.pending_turn_events.is_empty() {
+             let books: Vec<usize> = self.players.iter().map(Player::book_count).collect();
+             record.turns.push(TurnRecord {
+                 player: self.pending_turn_player,
+                 events: self.pending_turn_events.clone(),
+                 books_after_turn: books,
+             });
+         }
+         record

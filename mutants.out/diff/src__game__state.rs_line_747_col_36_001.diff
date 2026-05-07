@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace % with + in Game::advance_turn
+@@ -739,17 +739,17 @@
+         self.flush_turn();
+ 
+         let count = self.players.len();
+         if count == 0 {
+             return;
+         }
+ 
+         let start = self.current_player;
+-        let mut next = (start + 1) % count;
++        let mut next = (start + 1) + /* ~ changed by cargo-mutants ~ */ count;
+ 
+         for _ in 0..count {
+             // If this player has cards they can act.
+             if !self.players[next].hand_is_empty() {
+                 self.current_player = next;
+                 #[cfg(feature = "history")]
+                 {
+                     self.pending_turn_player = next;

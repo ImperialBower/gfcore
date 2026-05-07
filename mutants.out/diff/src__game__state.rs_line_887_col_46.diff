@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace && with || in Game::no_productive_ask_exists
+@@ -879,17 +879,17 @@
+                 continue;
+             }
+             for rank in player.held_ranks() {
+                 // Does any OTHER player have this rank?
+                 let other_has = self
+                     .players
+                     .iter()
+                     .enumerate()
+-                    .any(|(j, other)| j != i && other.has_rank(&rank));
++                    .any(|(j, other)| j != i || /* ~ changed by cargo-mutants ~ */ other.has_rank(&rank));
+                 if other_has {
+                     return false; // a productive ask exists
+                 }
+             }
+         }
+         true // no productive ask found
+     }
+ 

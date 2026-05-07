@@ -1,0 +1,21 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::book_size -> usize with 0
+@@ -59,17 +59,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};
+     ///
+     /// assert_eq!(StandardRules.book_size(), 4);
+     /// ```
+     fn book_size(&self) -> usize {
+-        4
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the number of cards dealt to each player at the start of the game.
+     ///
+     /// Seven cards for four or fewer players; five cards for five or more.
+     ///
+     /// # Examples
+     ///

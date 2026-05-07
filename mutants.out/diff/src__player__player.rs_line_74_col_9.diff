@@ -1,0 +1,26 @@
+--- src/player/player.rs
++++ replace Player::new_bot -> Self with Default::default()
+@@ -66,22 +66,17 @@
+     /// use gfcore::prelude::Player;
+     ///
+     /// let profile = BotProfile::basic("DeepFish");
+     /// let player = Player::new_bot("Bot-1", profile);
+     /// assert!(player.is_bot());
+     /// ```
+     #[must_use]
+     pub fn new_bot(name: impl Into<String>, profile: BotProfile) -> Self {
+-        Self {
+-            name: name.into(),
+-            hand: BasicPile::default(),
+-            books: Vec::new(),
+-            profile: Some(profile),
+-        }
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Adds a card to this player's hand.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use cardpack::prelude::FrenchBasicCard;

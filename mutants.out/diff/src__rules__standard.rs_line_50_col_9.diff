@@ -1,0 +1,23 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::deck -> BasicPile with Default::default()
+@@ -42,19 +42,17 @@
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};
+     ///
+     /// let pile = StandardRules.deck();
+     /// assert_eq!(pile.len(), 52);
+     /// ```
+     fn deck(&self) -> BasicPile {
+-        let mut pile = Standard52::basic_pile();
+-        pile.shuffle();
+-        pile
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the number of cards required to complete a book.
+     ///
+     /// In Standard Go Fish a book is all four cards of a single rank.
+     ///
+     /// # Examples
+     ///

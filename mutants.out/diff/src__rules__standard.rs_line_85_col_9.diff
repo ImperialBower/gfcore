@@ -1,0 +1,21 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::initial_hand_size -> usize with 0
+@@ -77,17 +77,17 @@
+     /// use gfcore::rules::{GoFishRules, StandardRules};
+     ///
+     /// assert_eq!(StandardRules.initial_hand_size(2), 7);
+     /// assert_eq!(StandardRules.initial_hand_size(4), 7);
+     /// assert_eq!(StandardRules.initial_hand_size(5), 5);
+     /// assert_eq!(StandardRules.initial_hand_size(8), 5);
+     /// ```
+     fn initial_hand_size(&self, player_count: usize) -> usize {
+-        if player_count <= 4 { 7 } else { 5 }
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the minimum number of players required.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};

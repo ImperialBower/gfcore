@@ -369,4 +369,19 @@ mod tests {
         let rank = FrenchBasicCard::ACE_SPADES.rank;
         assert!(!HappyFamiliesRules.is_valid_ask(&empty, &rank));
     }
+
+    #[test]
+    fn test_deck_name_is_happy_families() {
+        assert_eq!(HappyFamilies::deck_name(), "Happy Families");
+    }
+
+    #[test]
+    fn test_fluent_deck_key_is_non_empty() {
+        assert!(!HappyFamilies::fluent_deck_key().is_empty());
+    }
+
+    #[test]
+    fn test_colors_is_non_empty() {
+        assert!(!HappyFamilies::colors().is_empty());
+    }
 }

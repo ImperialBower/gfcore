@@ -1,0 +1,21 @@
+--- src/rules/happy_families.rs
++++ replace <impl GoFishRules for HappyFamiliesRules>::min_players -> usize with 0
+@@ -202,17 +202,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};
+     ///
+     /// assert_eq!(HappyFamiliesRules.min_players(), 2);
+     /// ```
+     fn min_players(&self) -> usize {
+-        2
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns 8: Happy Families supports up to 8 players.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};

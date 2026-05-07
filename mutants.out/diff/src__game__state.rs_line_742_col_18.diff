@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace == with != in Game::advance_turn
+@@ -734,17 +734,17 @@
+     /// `current_player` is still advanced (the win-condition check that
+     /// follows will transition to `GameOver`).
+     fn advance_turn(&mut self) {
+         // Flush the outgoing player's turn before changing current_player.
+         #[cfg(feature = "history")]
+         self.flush_turn();
+ 
+         let count = self.players.len();
+-        if count == 0 {
++        if count != /* ~ changed by cargo-mutants ~ */ 0 {
+             return;
+         }
+ 
+         let start = self.current_player;
+         let mut next = (start + 1) % count;
+ 
+         for _ in 0..count {
+             // If this player has cards they can act.

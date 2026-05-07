@@ -1,0 +1,21 @@
+--- src/player/view.rs
++++ delete ! in PlayerView::from_perspective
+@@ -96,17 +96,17 @@
+     /// assert!(views[1].hand.is_none());  // Alice cannot see Bob's hand
+     /// assert_eq!(views[1].hand_size, 2); // But she knows Bob has 2 cards
+     /// # Ok::<(), gfcore::prelude::GfError>(())
+     /// ```
+     pub fn from_perspective(
+         players: &[Player],
+         observer: usize,
+     ) -> Result<Vec<PlayerView>, GfError> {
+-        if !players.is_empty() && observer >= players.len() {
++        if  /* ~ changed by cargo-mutants ~ */players.is_empty() && observer >= players.len() {
+             return Err(GfError::InvalidTarget);
+         }
+         Ok(players
+             .iter()
+             .enumerate()
+             .map(|(index, player)| {
+                 let hand = if index == observer {
+                     Some(player.hand().clone())

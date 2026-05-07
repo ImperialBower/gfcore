@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace == with != in Game::handle_ask
+@@ -489,17 +489,17 @@
+     fn handle_ask(&mut self, target: usize, rank: Pip) -> Result<GameEvent, GfError> {
+         if self.phase != GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
+             return Err(GfError::OutOfTurn);
+         }
+ 
+         let cp = self.current_player;
+ 
+         // Validate target.
+-        if target == cp || target >= self.players.len() {
++        if target != /* ~ changed by cargo-mutants ~ */ cp || target >= self.players.len() {
+             return Err(GfError::InvalidTarget);
+         }
+ 
+         // The asker must hold the requested rank.
+         if !self.players[cp].has_rank(&rank) {
+             return Err(GfError::InvalidAsk);
+         }
+ 

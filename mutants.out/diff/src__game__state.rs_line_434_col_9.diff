@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace Game::phase -> &GamePhase with Box::leak(Box::new(Default::default()))
+@@ -426,17 +426,17 @@
+     /// use gfcore::prelude::{Game, GamePhase, GameVariant, Player};
+     ///
+     /// let players = vec![Player::new("Alice"), Player::new("Bob")];
+     /// let game = Game::new(GameVariant::Standard, players).unwrap();
+     /// assert_eq!(*game.phase(), GamePhase::WaitingForAsk);
+     /// ```
+     #[must_use]
+     pub fn phase(&self) -> &GamePhase {
+-        &self.phase
++        Box::leak(Box::new(Default::default())) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns `true` if the game has reached the [`GamePhase::GameOver`] state.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::prelude::{Game, GameVariant, Player};

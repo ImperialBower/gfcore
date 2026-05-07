@@ -1,0 +1,49 @@
+--- src/wasm_api.rs
++++ replace new_game -> String with "xyzzy".into()
+@@ -90,45 +90,17 @@
+ /// - `_seed`: reserved for future reproducible shuffle support; currently
+ ///   the deck shuffle uses the system RNG and this value is ignored.
+ ///
+ /// Returns the initial [`crate::game::GameState`] as JSON, or
+ /// `{"error": "..."}` on failure.
+ #[must_use]
+ #[wasm_bindgen]
+ pub fn new_game(variant: &str, player_names_json: &str, _seed: f64) -> String {
+-    let names: Vec<String> = match serde_json::from_str(player_names_json) {
+-        Ok(n) => n,
+-        Err(e) => return error_json(&format!("invalid player_names_json: {e}")),
+-    };
+-
+-    let game_variant = match parse_variant(variant) {
+-        Ok(v) => v,
+-        Err(e) => return error_json(&e),
+-    };
+-
+-    let players: Vec<Player> = names.into_iter().map(Player::new).collect();
+-
+-    let game = match Game::new(game_variant, players) {
+-        Ok(g) => g,
+-        Err(e) => return error_json(&e.to_string()),
+-    };
+-
+-    let state_json = match game.state() {
+-        Ok(s) => match serde_json::to_string(&s) {
+-            Ok(j) => j,
+-            Err(e) => return error_json(&e.to_string()),
+-        },
+-        Err(e) => return error_json(&e.to_string()),
+-    };
+-
+-    GAME.with(|g| *g.borrow_mut() = Some(game));
+-    PROFILES.with(|p| p.borrow_mut().clear());
+-
+-    state_json
++    "xyzzy".into() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Creates a new game with `bot_count` bot players using the default profiles.
+ ///
+ /// - `variant`: `"Standard"`, `"HappyFamilies"`, or `"Quartet"`.
+ /// - `bot_count`: number of bot players (1–4, bounded by available default profiles).
+ /// - `_seed`: reserved for future reproducible shuffle support; currently ignored.
+ ///

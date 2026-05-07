@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace >= with < in Game::check_and_collect_book
+@@ -836,17 +836,17 @@
+     /// Checks whether `player` now has `book_size` cards of `rank` and, if so,
+     /// removes them from the hand and records a book.  Returns `true` if a book
+     /// was collected.
+     fn check_and_collect_book(&mut self, player: usize, rank: &Pip, book_size: usize) -> bool {
+         if player >= self.players.len() {
+             return false;
+         }
+         let cards_of_rank = self.players[player].cards_of_rank(rank);
+-        if cards_of_rank.len() >= book_size {
++        if cards_of_rank.len() < /* ~ changed by cargo-mutants ~ */ book_size {
+             let book = self.players[player].give_cards_of_rank(rank);
+             self.players[player].add_book(book);
+             return true;
+         }
+         false
+     }
+ 
+     /// Drains all completed books from `player`'s hand on game start.

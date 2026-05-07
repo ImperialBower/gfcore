@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace Game::current_player -> usize with 0
+@@ -410,17 +410,17 @@
+     /// use gfcore::prelude::{Game, GameVariant, Player};
+     ///
+     /// let players = vec![Player::new("Alice"), Player::new("Bob")];
+     /// let game = Game::new(GameVariant::Standard, players).unwrap();
+     /// assert_eq!(game.current_player(), 0);
+     /// ```
+     #[must_use]
+     pub fn current_player(&self) -> usize {
+-        self.current_player
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns a reference to the current game phase.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::prelude::{Game, GamePhase, GameVariant, Player};

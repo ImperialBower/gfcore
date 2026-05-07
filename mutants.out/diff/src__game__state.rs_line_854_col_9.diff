@@ -1,0 +1,28 @@
+--- src/game/state.rs
++++ replace Game::collect_books_for_player with ()
+@@ -846,24 +846,17 @@
+             self.players[player].add_book(book);
+             return true;
+         }
+         false
+     }
+ 
+     /// Drains all completed books from `player`'s hand on game start.
+     fn collect_books_for_player(player: &mut Player, book_size: usize) {
+-        let ranks: Vec<Pip> = player.held_ranks();
+-        for rank in ranks {
+-            let count = player.cards_of_rank(&rank).len();
+-            if count >= book_size {
+-                let book = player.give_cards_of_rank(&rank);
+-                player.add_book(book);
+-            }
+-        }
++        () /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — win condition
+     // -----------------------------------------------------------------------
+ 
+     /// Returns `true` if no productive ask is possible anywhere in the game.
+     ///

@@ -1,0 +1,25 @@
+--- src/bot/profile.rs
++++ replace BotProfile::random -> Self with Default::default()
+@@ -67,21 +67,17 @@
+     /// ```
+     /// use gfcore::bot::BotProfile;
+     ///
+     /// let profile = BotProfile::random("Lucky");
+     /// assert_eq!(profile.name, "Lucky");
+     /// ```
+     #[must_use]
+     pub fn random(name: impl Into<String>) -> Self {
+-        Self {
+-            name: name.into(),
+-            strategy: Box::new(RandomStrategy),
+-            kind: StrategyKind::Random,
+-        }
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Creates a profile backed by [`BasicStrategy`].
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::bot::BotProfile;

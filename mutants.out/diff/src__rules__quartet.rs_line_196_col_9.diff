@@ -1,0 +1,21 @@
+--- src/rules/quartet.rs
++++ replace <impl GoFishRules for QuartetRules>::min_players -> usize with 0
+@@ -188,17 +188,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};
+     ///
+     /// assert_eq!(QuartetRules.min_players(), 2);
+     /// ```
+     fn min_players(&self) -> usize {
+-        2
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns 8: Quartet supports up to 8 players.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};

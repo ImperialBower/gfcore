@@ -1,0 +1,156 @@
+src/error/mod.rs:154:9: replace <impl fmt::Display for GfError>::fmt -> fmt::Result with Ok(Default::default())
+src/bot/profile.rs:197:9: replace BotProfile::default_profiles -> Vec<Self> with vec![]
+src/game/state.rs:358:23: replace == with != in Game::act
+src/game/state.rs:418:9: replace Game::current_player -> usize with 0
+src/game/state.rs:418:9: replace Game::current_player -> usize with 1
+src/game/state.rs:450:9: replace Game::is_over -> bool with true
+src/game/state.rs:450:9: replace Game::is_over -> bool with false
+src/game/state.rs:450:20: replace == with != in Game::is_over
+src/game/state.rs:473:12: delete ! in Game::record
+src/game/state.rs:490:51: replace && with || in Game::handle_ask
+src/game/state.rs:490:23: replace != with == in Game::handle_ask
+src/game/state.rs:490:65: replace != with == in Game::handle_ask
+src/game/state.rs:497:25: replace || with && in Game::handle_ask
+src/game/state.rs:497:19: replace == with != in Game::handle_ask
+src/game/state.rs:497:35: replace >= with < in Game::handle_ask
+src/game/state.rs:502:12: delete ! in Game::handle_ask
+src/game/state.rs:588:23: replace != with == in Game::handle_draw
+src/game/state.rs:702:9: replace Game::replenish_until_has_cards -> bool with true
+src/game/state.rs:708:46: replace + with - in Game::replenish_until_has_cards
+src/game/state.rs:710:16: delete ! in Game::replenish_until_has_cards
+src/game/state.rs:738:9: replace Game::advance_turn with ()
+src/game/state.rs:742:18: replace == with != in Game::advance_turn
+src/game/state.rs:747:36: replace % with / in Game::advance_turn
+src/game/state.rs:747:36: replace % with + in Game::advance_turn
+src/game/state.rs:747:31: replace + with - in Game::advance_turn
+src/game/state.rs:747:31: replace + with * in Game::advance_turn
+src/game/state.rs:769:26: replace + with - in Game::advance_turn
+src/game/state.rs:791:9: replace Game::ensure_current_player_can_ask with ()
+src/game/state.rs:791:51: replace && with || in Game::ensure_current_player_can_ask
+src/game/state.rs:791:65: replace != with == in Game::ensure_current_player_can_ask
+src/game/state.rs:812:9: replace Game::push_event with ()
+src/game/state.rs:821:9: replace Game::flush_turn with ()
+src/game/state.rs:840:9: replace Game::check_and_collect_book -> bool with true
+src/game/state.rs:840:9: replace Game::check_and_collect_book -> bool with false
+src/game/state.rs:840:19: replace >= with < in Game::check_and_collect_book
+src/game/state.rs:844:32: replace >= with < in Game::check_and_collect_book
+src/game/state.rs:857:22: replace >= with < in Game::collect_books_for_player
+src/game/state.rs:877:9: replace Game::no_productive_ask_exists -> bool with false
+src/game/state.rs:887:46: replace && with || in Game::no_productive_ask_exists
+src/game/state.rs:887:41: replace != with == in Game::no_productive_ask_exists
+src/game/state.rs:905:9: replace Game::check_win_condition -> Option<GameEvent> with None
+src/game/state.rs:905:12: delete ! in Game::check_win_condition
+src/game/state.rs:914:26: delete ! in Game::check_win_condition
+src/game/state.rs:916:29: replace && with || in Game::check_win_condition
+src/game/state.rs:916:32: delete ! in Game::check_win_condition
+src/game/state.rs:931:45: replace == with != in Game::check_win_condition
+src/player/player.rs:95:9: replace Player::receive_card with ()
+src/player/player.rs:119:9: replace Player::give_cards_of_rank -> BasicPile with Default::default()
+src/player/player.rs:121:58: replace == with != in Player::give_cards_of_rank
+src/player/player.rs:144:9: replace Player::has_rank -> bool with true
+src/player/player.rs:144:9: replace Player::has_rank -> bool with false
+src/player/player.rs:144:48: replace == with != in Player::has_rank
+src/player/player.rs:166:9: replace Player::cards_of_rank -> BasicPile with Default::default()
+src/player/player.rs:168:39: replace == with != in Player::cards_of_rank
+src/player/player.rs:196:9: replace Player::add_book with ()
+src/player/player.rs:219:9: replace Player::book_count -> usize with 0
+src/player/player.rs:219:9: replace Player::book_count -> usize with 1
+src/player/player.rs:247:9: replace Player::book_ranks -> Vec<String> with vec![]
+src/player/player.rs:247:9: replace Player::book_ranks -> Vec<String> with vec![String::new()]
+src/player/player.rs:247:9: replace Player::book_ranks -> Vec<String> with vec!["xyzzy".into()]
+src/player/player.rs:273:9: replace Player::hand_size -> usize with 0
+src/player/player.rs:273:9: replace Player::hand_size -> usize with 1
+src/player/player.rs:291:9: replace Player::hand_is_empty -> bool with true
+src/player/player.rs:291:9: replace Player::hand_is_empty -> bool with false
+src/player/player.rs:315:9: replace Player::held_ranks -> Vec<Pip> with vec![]
+src/player/player.rs:315:9: replace Player::held_ranks -> Vec<Pip> with vec![Default::default()]
+src/player/player.rs:341:9: replace Player::is_bot -> bool with true
+src/player/player.rs:341:9: replace Player::is_bot -> bool with false
+src/player/player.rs:359:9: replace Player::hand -> &BasicPile with Box::leak(Box::new(Default::default()))
+src/player/view.rs:104:9: replace PlayerView::from_perspective -> Result<Vec<PlayerView>, GfError> with Ok(vec![])
+src/player/view.rs:104:32: replace && with || in PlayerView::from_perspective
+src/player/view.rs:104:12: delete ! in PlayerView::from_perspective
+src/player/view.rs:104:44: replace >= with < in PlayerView::from_perspective
+src/player/view.rs:111:37: replace == with != in PlayerView::from_perspective
+src/rules/happy_families.rs:100:9: replace <impl DeckedBase for HappyFamilies>::base_vec -> Vec<BasicCard> with vec![]
+src/rules/happy_families.rs:100:9: replace <impl DeckedBase for HappyFamilies>::base_vec -> Vec<BasicCard> with vec![Default::default()]
+src/rules/happy_families.rs:154:9: replace <impl GoFishRules for HappyFamiliesRules>::name -> &'static str with ""
+src/rules/happy_families.rs:154:9: replace <impl GoFishRules for HappyFamiliesRules>::name -> &'static str with "xyzzy"
+src/rules/happy_families.rs:168:9: replace <impl GoFishRules for HappyFamiliesRules>::deck -> BasicPile with Default::default()
+src/rules/happy_families.rs:183:9: replace <impl GoFishRules for HappyFamiliesRules>::book_size -> usize with 0
+src/rules/happy_families.rs:183:9: replace <impl GoFishRules for HappyFamiliesRules>::book_size -> usize with 1
+src/rules/happy_families.rs:197:9: replace <impl GoFishRules for HappyFamiliesRules>::initial_hand_size -> usize with 0
+src/rules/happy_families.rs:197:9: replace <impl GoFishRules for HappyFamiliesRules>::initial_hand_size -> usize with 1
+src/rules/happy_families.rs:197:25: replace <= with > in <impl GoFishRules for HappyFamiliesRules>::initial_hand_size
+src/rules/happy_families.rs:210:9: replace <impl GoFishRules for HappyFamiliesRules>::min_players -> usize with 0
+src/rules/happy_families.rs:210:9: replace <impl GoFishRules for HappyFamiliesRules>::min_players -> usize with 1
+src/rules/happy_families.rs:223:9: replace <impl GoFishRules for HappyFamiliesRules>::max_players -> usize with 0
+src/rules/happy_families.rs:223:9: replace <impl GoFishRules for HappyFamiliesRules>::max_players -> usize with 1
+src/rules/happy_families.rs:243:9: replace <impl GoFishRules for HappyFamiliesRules>::is_valid_ask -> bool with true
+src/rules/happy_families.rs:243:9: replace <impl GoFishRules for HappyFamiliesRules>::is_valid_ask -> bool with false
+src/rules/happy_families.rs:243:43: replace == with != in <impl GoFishRules for HappyFamiliesRules>::is_valid_ask
+src/rules/happy_families.rs:270:9: replace <impl GoFishRules for HappyFamiliesRules>::is_book -> bool with true
+src/rules/happy_families.rs:270:9: replace <impl GoFishRules for HappyFamiliesRules>::is_book -> bool with false
+src/rules/happy_families.rs:270:24: replace != with == in <impl GoFishRules for HappyFamiliesRules>::is_book
+src/rules/happy_families.rs:275:43: replace == with != in <impl GoFishRules for HappyFamiliesRules>::is_book
+src/rules/quartet.rs:86:9: replace <impl DeckedBase for Quartet>::base_vec -> Vec<BasicCard> with vec![]
+src/rules/quartet.rs:86:9: replace <impl DeckedBase for Quartet>::base_vec -> Vec<BasicCard> with vec![Default::default()]
+src/rules/quartet.rs:140:9: replace <impl GoFishRules for QuartetRules>::name -> &'static str with ""
+src/rules/quartet.rs:140:9: replace <impl GoFishRules for QuartetRules>::name -> &'static str with "xyzzy"
+src/rules/quartet.rs:154:9: replace <impl GoFishRules for QuartetRules>::deck -> BasicPile with Default::default()
+src/rules/quartet.rs:169:9: replace <impl GoFishRules for QuartetRules>::book_size -> usize with 0
+src/rules/quartet.rs:169:9: replace <impl GoFishRules for QuartetRules>::book_size -> usize with 1
+src/rules/quartet.rs:183:9: replace <impl GoFishRules for QuartetRules>::initial_hand_size -> usize with 0
+src/rules/quartet.rs:183:9: replace <impl GoFishRules for QuartetRules>::initial_hand_size -> usize with 1
+src/rules/quartet.rs:183:25: replace <= with > in <impl GoFishRules for QuartetRules>::initial_hand_size
+src/rules/quartet.rs:196:9: replace <impl GoFishRules for QuartetRules>::min_players -> usize with 0
+src/rules/quartet.rs:196:9: replace <impl GoFishRules for QuartetRules>::min_players -> usize with 1
+src/rules/quartet.rs:209:9: replace <impl GoFishRules for QuartetRules>::max_players -> usize with 0
+src/rules/quartet.rs:209:9: replace <impl GoFishRules for QuartetRules>::max_players -> usize with 1
+src/rules/quartet.rs:229:9: replace <impl GoFishRules for QuartetRules>::is_valid_ask -> bool with true
+src/rules/quartet.rs:229:9: replace <impl GoFishRules for QuartetRules>::is_valid_ask -> bool with false
+src/rules/quartet.rs:229:43: replace == with != in <impl GoFishRules for QuartetRules>::is_valid_ask
+src/rules/quartet.rs:256:9: replace <impl GoFishRules for QuartetRules>::is_book -> bool with true
+src/rules/quartet.rs:256:9: replace <impl GoFishRules for QuartetRules>::is_book -> bool with false
+src/rules/quartet.rs:256:24: replace != with == in <impl GoFishRules for QuartetRules>::is_book
+src/rules/quartet.rs:261:43: replace == with != in <impl GoFishRules for QuartetRules>::is_book
+src/rules/standard.rs:36:9: replace <impl GoFishRules for StandardRules>::name -> &'static str with ""
+src/rules/standard.rs:36:9: replace <impl GoFishRules for StandardRules>::name -> &'static str with "xyzzy"
+src/rules/standard.rs:50:9: replace <impl GoFishRules for StandardRules>::deck -> BasicPile with Default::default()
+src/rules/standard.rs:67:9: replace <impl GoFishRules for StandardRules>::book_size -> usize with 0
+src/rules/standard.rs:67:9: replace <impl GoFishRules for StandardRules>::book_size -> usize with 1
+src/rules/standard.rs:85:9: replace <impl GoFishRules for StandardRules>::initial_hand_size -> usize with 0
+src/rules/standard.rs:85:9: replace <impl GoFishRules for StandardRules>::initial_hand_size -> usize with 1
+src/rules/standard.rs:85:25: replace <= with > in <impl GoFishRules for StandardRules>::initial_hand_size
+src/rules/standard.rs:98:9: replace <impl GoFishRules for StandardRules>::min_players -> usize with 0
+src/rules/standard.rs:98:9: replace <impl GoFishRules for StandardRules>::min_players -> usize with 1
+src/rules/standard.rs:111:9: replace <impl GoFishRules for StandardRules>::max_players -> usize with 0
+src/rules/standard.rs:111:9: replace <impl GoFishRules for StandardRules>::max_players -> usize with 1
+src/rules/standard.rs:134:9: replace <impl GoFishRules for StandardRules>::is_valid_ask -> bool with true
+src/rules/standard.rs:134:9: replace <impl GoFishRules for StandardRules>::is_valid_ask -> bool with false
+src/rules/standard.rs:134:43: replace == with != in <impl GoFishRules for StandardRules>::is_valid_ask
+src/rules/standard.rs:166:9: replace <impl GoFishRules for StandardRules>::is_book -> bool with true
+src/rules/standard.rs:166:9: replace <impl GoFishRules for StandardRules>::is_book -> bool with false
+src/rules/standard.rs:166:24: replace != with == in <impl GoFishRules for StandardRules>::is_book
+src/rules/standard.rs:172:47: replace == with != in <impl GoFishRules for StandardRules>::is_book
+src/history/record.rs:138:9: replace GameRecord::to_yaml -> Result<String, GfError> with Ok(String::new())
+src/history/record.rs:138:9: replace GameRecord::to_yaml -> Result<String, GfError> with Ok("xyzzy".into())
+src/history/record.rs:179:9: replace GameRecord::to_json -> Result<String, GfError> with Ok(String::new())
+src/history/record.rs:179:9: replace GameRecord::to_json -> Result<String, GfError> with Ok("xyzzy".into())
+src/history/record.rs:253:9: replace GameCollection::push with ()
+src/history/record.rs:268:9: replace GameCollection::len -> usize with 0
+src/history/record.rs:268:9: replace GameCollection::len -> usize with 1
+src/history/record.rs:283:9: replace GameCollection::is_empty -> bool with true
+src/history/record.rs:283:9: replace GameCollection::is_empty -> bool with false
+src/history/record.rs:298:9: replace GameCollection::iter -> impl Iterator<Item =&GameRecord> with ::std::iter::empty()
+src/history/record.rs:318:9: replace GameCollection::to_yaml -> Result<String, GfError> with Ok(String::new())
+src/history/record.rs:318:9: replace GameCollection::to_yaml -> Result<String, GfError> with Ok("xyzzy".into())
+src/history/record.rs:340:9: replace GameCollection::from_yaml -> Result<Self, GfError> with Ok(Default::default())
+src/history/record.rs:360:9: replace GameCollection::to_json -> Result<String, GfError> with Ok(String::new())
+src/history/record.rs:360:9: replace GameCollection::to_json -> Result<String, GfError> with Ok("xyzzy".into())
+src/history/record.rs:382:9: replace GameCollection::from_json -> Result<Self, GfError> with Ok(Default::default())
+src/bot/strategy/basic.rs:104:59: replace += with -= in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:104:59: replace += with *= in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:129:39: replace != with == in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/basic.rs:135:62: replace != with == in <impl BotStrategy for BasicStrategy>::decide
+src/bot/strategy/random.rs:97:72: replace != with == in <impl BotStrategy for RandomStrategy>::decide

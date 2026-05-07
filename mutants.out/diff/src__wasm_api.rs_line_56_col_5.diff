@@ -1,0 +1,21 @@
+--- src/wasm_api.rs
++++ replace error_json -> String with String::new()
+@@ -48,17 +48,17 @@
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // Private helpers
+ // ---------------------------------------------------------------------------
+ 
+ /// Formats a JSON error object from an error message string.
+ fn error_json(msg: &str) -> String {
+-    format!("{{\"error\":{}}}", serde_json::json!(msg))
++    String::new() /* ~ changed by cargo-mutants ~ */
+ }
+ 
+ /// Parses a variant name string into a [`GameVariant`].
+ fn parse_variant(s: &str) -> Result<GameVariant, String> {
+     match s {
+         "Standard" => Ok(GameVariant::Standard),
+         "HappyFamilies" => Ok(GameVariant::HappyFamilies),
+         "Quartet" => Ok(GameVariant::Quartet),

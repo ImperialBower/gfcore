@@ -1,0 +1,21 @@
+--- src/rules/happy_families.rs
++++ replace <impl GoFishRules for HappyFamiliesRules>::book_size -> usize with 0
+@@ -175,17 +175,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};
+     ///
+     /// assert_eq!(HappyFamiliesRules.book_size(), 4);
+     /// ```
+     fn book_size(&self) -> usize {
+-        4
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the initial hand size: 6 cards for 2–4 players, 4 for 5–8.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};

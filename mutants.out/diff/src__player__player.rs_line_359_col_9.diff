@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::hand -> &BasicPile with Box::leak(Box::new(Default::default()))
+@@ -351,17 +351,17 @@
+     ///
+     /// let mut player = Player::new("Mia");
+     /// player.receive_card(FrenchBasicCard::ACE_SPADES);
+     ///
+     /// assert_eq!(player.hand().len(), 1);
+     /// ```
+     #[must_use]
+     pub fn hand(&self) -> &BasicPile {
+-        &self.hand
++        Box::leak(Box::new(Default::default())) /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+     use cardpack::prelude::FrenchBasicCard;
+ 

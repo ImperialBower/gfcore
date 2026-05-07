@@ -1,0 +1,42 @@
+--- src/player/view.rs
++++ replace PlayerView::from_perspective -> Result<Vec<PlayerView>, GfError> with Ok(vec![Default::default()])
+@@ -96,38 +96,17 @@
+     /// assert!(views[1].hand.is_none());  // Alice cannot see Bob's hand
+     /// assert_eq!(views[1].hand_size, 2); // But she knows Bob has 2 cards
+     /// # Ok::<(), gfcore::prelude::GfError>(())
+     /// ```
+     pub fn from_perspective(
+         players: &[Player],
+         observer: usize,
+     ) -> Result<Vec<PlayerView>, GfError> {
+-        if !players.is_empty() && observer >= players.len() {
+-            return Err(GfError::InvalidTarget);
+-        }
+-        Ok(players
+-            .iter()
+-            .enumerate()
+-            .map(|(index, player)| {
+-                let hand = if index == observer {
+-                    Some(player.hand().clone())
+-                } else {
+-                    None
+-                };
+-                PlayerView {
+-                    index,
+-                    name: player.name.clone(),
+-                    hand_size: player.hand_size(),
+-                    hand,
+-                    books: player.book_count(),
+-                    completed_book_ranks: player.book_ranks(),
+-                }
+-            })
+-            .collect())
++        Ok(vec![Default::default()]) /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+     use cardpack::prelude::FrenchBasicCard;
+ 

@@ -1,0 +1,21 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::max_players -> usize with 1
+@@ -103,17 +103,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, StandardRules};
+     ///
+     /// assert_eq!(StandardRules.max_players(), 8);
+     /// ```
+     fn max_players(&self) -> usize {
+-        8
++        1 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns `true` if the player's hand contains at least one card of the given rank.
+     ///
+     /// A player may only ask for a rank they already hold in their hand.
+     ///
+     /// # Examples
+     ///

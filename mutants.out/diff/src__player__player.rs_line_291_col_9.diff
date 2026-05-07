@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::hand_is_empty -> bool with true
+@@ -283,17 +283,17 @@
+     ///
+     /// let mut player = Player::new("Jack");
+     /// assert!(player.hand_is_empty());
+     /// player.receive_card(FrenchBasicCard::ACE_SPADES);
+     /// assert!(!player.hand_is_empty());
+     /// ```
+     #[must_use]
+     pub fn hand_is_empty(&self) -> bool {
+-        self.hand.is_empty()
++        true /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the unique ranks currently held in this player's hand.
+     ///
+     /// The returned list contains each rank at most once and is in the order
+     /// first encountered while iterating the hand.
+     ///
+     /// # Examples

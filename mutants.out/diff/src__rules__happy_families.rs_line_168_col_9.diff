@@ -1,0 +1,23 @@
+--- src/rules/happy_families.rs
++++ replace <impl GoFishRules for HappyFamiliesRules>::deck -> BasicPile with Default::default()
+@@ -160,19 +160,17 @@
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};
+     ///
+     /// let pile = HappyFamiliesRules.deck();
+     /// assert_eq!(pile.len(), 44);
+     /// ```
+     fn deck(&self) -> BasicPile {
+-        let mut pile = HappyFamilies::basic_pile();
+-        pile.shuffle();
+-        pile
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns 4: four matching cards form a book.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, HappyFamiliesRules};

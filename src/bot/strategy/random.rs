@@ -158,4 +158,29 @@ mod tests {
             }
         }
     }
+
+    fn single_player_view() -> (BasicPile, Vec<PlayerView>) {
+        use crate::player::Player;
+        let mut alice = Player::new("Alice");
+        alice.receive_card(FrenchBasicCard::ACE_SPADES);
+        alice.receive_card(FrenchBasicCard::ACE_HEARTS);
+        let views = PlayerView::from_perspective(&[alice], 0).unwrap();
+        let hand = views[0].hand.clone().unwrap_or_default();
+        (hand, views)
+    }
+
+    #[test]
+    fn test_random_strategy_degenerate_single_player_target() {
+        // When targets is empty (only 1 player), fallback uses:
+        // `(observer + 1) % players.len().max(2)` = (0 + 1) % 2 = 1.
+        // Mutants replacing `%` with `/` give (0+1)/2 = 0;
+        // replacing `+` with `*` give 0*1 % 2 = 0.
+        let strategy = RandomStrategy;
+        let (hand, players) = single_player_view();
+        if let PlayerAction::Ask { target, .. } = strategy.decide(&hand, &players, &[]) {
+            assert_eq!(target, 1, "degenerate target must be 1, got {target}");
+        } else {
+            panic!("expected Ask action");
+        }
+    }
 }

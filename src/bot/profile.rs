@@ -331,4 +331,23 @@ mod tests {
             panic!("expected Ask");
         }
     }
+
+    #[test]
+    fn test_bot_profile_debug_contains_name_and_struct_name() {
+        let profile = BotProfile::random("Lucky");
+        let debug = format!("{profile:?}");
+        assert!(
+            debug.contains("BotProfile"),
+            "debug must contain struct name"
+        );
+        assert!(debug.contains("Lucky"), "debug must contain the bot's name");
+    }
+
+    #[test]
+    fn test_bot_profile_debug_basic_strategy_contains_kind() {
+        let profile = BotProfile::basic("Harriet");
+        let debug = format!("{profile:?}");
+        assert!(debug.contains("BotProfile"));
+        assert!(debug.contains("Harriet"));
+    }
 }

@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace >= with < in Game::replenish_until_has_cards
+@@ -694,17 +694,17 @@
+     // -----------------------------------------------------------------------
+ 
+     /// Replenishes `player_index`'s hand by drawing cards from the pile until
+     /// they have at least one card that is NOT immediately turned into a book,
+     /// or the draw pile runs out.
+     ///
+     /// Returns `true` if the player ends up with at least one card in hand.
+     fn replenish_until_has_cards(&mut self, player_index: usize) -> bool {
+-        if player_index >= self.players.len() {
++        if player_index < /* ~ changed by cargo-mutants ~ */ self.players.len() {
+             return false;
+         }
+         let book_size = self.variant.rules().book_size();
+         // Draw cards until the player holds at least one or pile is exhausted.
+         // Bound the loop to the pile size to prevent any infinite loop.
+         let max_draws = self.draw_pile.len() + 1;
+         for _ in 0..max_draws {
+             if !self.players[player_index].hand_is_empty() {

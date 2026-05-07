@@ -1,0 +1,30 @@
+--- src/bot/profile.rs
++++ replace <impl Clone for BotProfile>::clone -> Self with Default::default()
+@@ -217,26 +217,17 @@
+     /// use gfcore::bot::BotProfile;
+     ///
+     /// let original = BotProfile::random("Lucky");
+     /// let copy = original.clone();
+     /// assert_eq!(copy.name, "Lucky");
+     /// // Copy retains RandomStrategy behaviour (not silently converted to Basic).
+     /// ```
+     fn clone(&self) -> Self {
+-        let strategy: Box<dyn BotStrategy> = match self.kind {
+-            StrategyKind::Random => Box::new(RandomStrategy),
+-            // Custom strategies are not clonable; fall back to BasicStrategy.
+-            StrategyKind::Basic | StrategyKind::Custom => Box::new(BasicStrategy),
+-        };
+-        Self {
+-            name: self.name.clone(),
+-            strategy,
+-            kind: self.kind,
+-        }
++        Default::default() /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+ 
+     #[test]

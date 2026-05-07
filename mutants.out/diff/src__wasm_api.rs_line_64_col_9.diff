@@ -1,0 +1,21 @@
+--- src/wasm_api.rs
++++ delete match arm "Quartet" in parse_variant
+@@ -56,17 +56,17 @@
+     format!("{{\"error\":{}}}", serde_json::json!(msg))
+ }
+ 
+ /// Parses a variant name string into a [`GameVariant`].
+ fn parse_variant(s: &str) -> Result<GameVariant, String> {
+     match s {
+         "Standard" => Ok(GameVariant::Standard),
+         "HappyFamilies" => Ok(GameVariant::HappyFamilies),
+-        "Quartet" => Ok(GameVariant::Quartet),
++         /* ~ changed by cargo-mutants ~ */
+         _ => Err(format!("unknown variant: {s}")),
+     }
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // Exported functions
+ // ---------------------------------------------------------------------------
+ 

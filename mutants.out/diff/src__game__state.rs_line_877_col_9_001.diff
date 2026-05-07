@@ -1,0 +1,37 @@
+--- src/game/state.rs
++++ replace Game::no_productive_ask_exists -> bool with false
+@@ -869,33 +869,17 @@
+     ///
+     /// A productive ask requires that some player `A` holds rank `R` and some
+     /// other player `B ≠ A` also holds at least one card of rank `R`.  When no
+     /// such pair exists (and the pile is empty), no book can ever be completed
+     /// by asking — the game is deadlocked.
+     fn no_productive_ask_exists(&self) -> bool {
+         // For each player who has cards, check whether any of their ranks
+         // appears in another player's hand.
+-        for (i, player) in self.players.iter().enumerate() {
+-            if player.hand_is_empty() {
+-                continue;
+-            }
+-            for rank in player.held_ranks() {
+-                // Does any OTHER player have this rank?
+-                let other_has = self
+-                    .players
+-                    .iter()
+-                    .enumerate()
+-                    .any(|(j, other)| j != i && other.has_rank(&rank));
+-                if other_has {
+-                    return false; // a productive ask exists
+-                }
+-            }
+-        }
+-        true // no productive ask found
++        false /* ~ changed by cargo-mutants ~ */ // no productive ask found
+     }
+ 
+     /// Checks whether the game-over condition is met and, if so, transitions
+     /// to [`GamePhase::GameOver`].  Returns the `GameOver` event if the game
+     /// just ended, or `None` if play should continue.
+     ///
+     /// Game over when the draw pile is empty **and** one of the following:
+     /// - Every player has an empty hand (all books are formed), OR

@@ -1,0 +1,21 @@
+--- src/history/record.rs
++++ replace GameCollection::to_yaml -> Result<String, GfError> with Ok("xyzzy".into())
+@@ -310,17 +310,17 @@
+     /// use gfcore::history::{GameCollection, GameRecord};
+     ///
+     /// let mut col = GameCollection::new();
+     /// col.push(GameRecord::new("Standard", vec!["Alice".to_string()]));
+     /// let yaml = col.to_yaml().expect("serialize");
+     /// assert!(!yaml.is_empty());
+     /// ```
+     pub fn to_yaml(&self) -> Result<String, GfError> {
+-        serde_norway::to_string(self).map_err(GfError::from)
++        Ok("xyzzy".into()) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Deserializes a [`GameCollection`] from a YAML string.
+     ///
+     /// # Errors
+     ///
+     /// Returns [`GfError::ParseError`] if the input is not valid YAML or does
+     /// not match the expected structure.

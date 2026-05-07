@@ -328,4 +328,28 @@ mod tests {
         ]);
         assert!(StandardRules.is_book(&four_aces));
     }
+
+    #[test]
+    fn test_game_variant_debug_standard() {
+        assert_eq!(
+            format!("{:?}", GameVariant::Standard),
+            "GameVariant::Standard"
+        );
+    }
+
+    #[test]
+    fn test_game_variant_debug_happy_families() {
+        assert_eq!(
+            format!("{:?}", GameVariant::HappyFamilies),
+            "GameVariant::HappyFamilies"
+        );
+    }
+
+    #[test]
+    fn test_game_variant_debug_quartet() {
+        assert_eq!(
+            format!("{:?}", GameVariant::Quartet),
+            "GameVariant::Quartet"
+        );
+    }
 }

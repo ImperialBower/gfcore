@@ -1,0 +1,122 @@
+--- src/game/state.rs
++++ replace Game::handle_draw -> Result<GameEvent, GfError> with Ok(Default::default())
+@@ -580,118 +580,17 @@
+             return Ok(over_event);
+         }
+ 
+         Ok(last_event)
+     }
+ 
+     /// Handles a `PlayerAction::Draw`.
+     fn handle_draw(&mut self) -> Result<GameEvent, GfError> {
+-        if self.phase != GamePhase::WaitingForDraw {
+-            return Err(GfError::OutOfTurn);
+-        }
+-
+-        // Save and clear last_asked_rank atomically so early-exit paths never
+-        // leave a stale value while the match check below still uses it.
+-        let asked_rank = self.last_asked_rank.take();
+-
+-        let cp = self.current_player;
+-
+-        if self.draw_pile.is_empty() {
+-            // No card to draw — advance turn and return to WaitingForAsk.
+-            let drew_event = GameEvent::Drew {
+-                player: cp,
+-                matched: false,
+-            };
+-            self.last_event = Some(drew_event.clone());
+-            #[cfg(feature = "history")]
+-            self.push_event(&drew_event);
+-            self.advance_turn();
+-            self.phase = GamePhase::WaitingForAsk;
+-            self.ensure_current_player_can_ask();
+-
+-            if let Some(over_event) = self.check_win_condition() {
+-                return Ok(over_event);
+-            }
+-            return Ok(drew_event);
+-        }
+-
+-        // Draw the top card.
+-        let Some(card) = self.draw_pile.draw_first() else {
+-            // draw_pile was not empty (we checked above), but draw_first
+-            // returned None — treat defensively as if pile empty.
+-            let drew_event = GameEvent::Drew {
+-                player: cp,
+-                matched: false,
+-            };
+-            self.last_event = Some(drew_event.clone());
+-            #[cfg(feature = "history")]
+-            self.push_event(&drew_event);
+-            self.advance_turn();
+-            self.phase = GamePhase::WaitingForAsk;
+-            self.ensure_current_player_can_ask();
+-            if let Some(over_event) = self.check_win_condition() {
+-                return Ok(over_event);
+-            }
+-            return Ok(drew_event);
+-        };
+-
+-        let matched = asked_rank == Some(card.rank);
+-
+-        self.players[cp].receive_card(card);
+-
+-        let drew_event = GameEvent::Drew {
+-            player: cp,
+-            matched,
+-        };
+-        self.last_event = Some(drew_event.clone());
+-        #[cfg(feature = "history")]
+-        self.push_event(&drew_event);
+-
+-        let book_size = self.variant.rules().book_size();
+-
+-        let last_event = if matched {
+-            // Check whether the drawn card completes a book.
+-            if let Some(ref r) = asked_rank {
+-                if self.check_and_collect_book(cp, r, book_size) {
+-                    let book_event = GameEvent::Book {
+-                        player: cp,
+-                        rank: r.index.to_string(),
+-                    };
+-                    self.last_event = Some(book_event.clone());
+-                    #[cfg(feature = "history")]
+-                    self.push_event(&book_event);
+-                    // Signal callers that a book was just completed; same player acts again.
+-                    self.phase = GamePhase::BookCompleted;
+-                    book_event
+-                } else {
+-                    // Drew the asked rank but no book yet — same player keeps turn.
+-                    self.phase = GamePhase::WaitingForAsk;
+-                    drew_event
+-                }
+-            } else {
+-                self.phase = GamePhase::WaitingForAsk;
+-                drew_event
+-            }
+-        } else {
+-            // Didn't match — next player's turn.
+-            self.advance_turn();
+-            self.phase = GamePhase::WaitingForAsk;
+-            drew_event
+-        };
+-
+-        // Ensure the current player (possibly a new one after advance_turn,
+-        // or the same one who just completed a book) has cards to act with.
+-        self.ensure_current_player_can_ask();
+-
+-        if let Some(over_event) = self.check_win_condition() {
+-            return Ok(over_event);
+-        }
+-
+-        Ok(last_event)
++        Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — turn management
+     // -----------------------------------------------------------------------
+ 
+     /// Replenishes `player_index`'s hand by drawing cards from the pile until
+     /// they have at least one card that is NOT immediately turned into a book,

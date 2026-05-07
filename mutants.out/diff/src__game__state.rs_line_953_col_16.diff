@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ delete ! in Game::check_win_condition
+@@ -945,17 +945,17 @@
+         self.last_event = Some(event.clone());
+ 
+         #[cfg(feature = "history")]
+         {
+             // Include GameOver in the current turn only if there are already
+             // events for this turn (i.e., the game ended mid-turn without an
+             // advance_turn flush).  If the turn was already flushed by
+             // advance_turn, we don't append a synthetic GameOver-only turn.
+-            if !self.pending_turn_events.is_empty() {
++            if  /* ~ changed by cargo-mutants ~ */self.pending_turn_events.is_empty() {
+                 self.pending_turn_events.push(event.clone());
+             }
+             self.flush_turn();
+             self.history.winner = winner;
+         }
+ 
+         Some(event)
+     }

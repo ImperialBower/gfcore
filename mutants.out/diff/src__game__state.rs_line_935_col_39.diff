@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace == with != in Game::check_win_condition
+@@ -927,17 +927,17 @@
+         let winners: Vec<usize> = self
+             .players
+             .iter()
+             .enumerate()
+             .filter(|(_, p)| p.book_count() == max_books)
+             .map(|(i, _)| i)
+             .collect();
+ 
+-        let winner = if winners.len() == 1 {
++        let winner = if winners.len() != /* ~ changed by cargo-mutants ~ */ 1 {
+             winners.first().copied()
+         } else {
+             None
+         };
+ 
+         self.winner = winner;
+         self.phase = GamePhase::GameOver;
+ 

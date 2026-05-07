@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace != with == in Game::handle_ask
+@@ -482,17 +482,17 @@
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — action handlers
+     // -----------------------------------------------------------------------
+ 
+     /// Handles a `PlayerAction::Ask`.
+     fn handle_ask(&mut self, target: usize, rank: Pip) -> Result<GameEvent, GfError> {
+-        if self.phase != GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
++        if self.phase == /* ~ changed by cargo-mutants ~ */ GamePhase::WaitingForAsk && self.phase != GamePhase::BookCompleted {
+             return Err(GfError::OutOfTurn);
+         }
+ 
+         let cp = self.current_player;
+ 
+         // Validate target.
+         if target == cp || target >= self.players.len() {
+             return Err(GfError::InvalidTarget);

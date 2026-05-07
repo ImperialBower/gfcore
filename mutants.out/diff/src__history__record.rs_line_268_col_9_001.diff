@@ -1,0 +1,21 @@
+--- src/history/record.rs
++++ replace GameCollection::len -> usize with 1
+@@ -260,17 +260,17 @@
+     /// ```
+     /// use gfcore::history::GameCollection;
+     ///
+     /// let col = GameCollection::new();
+     /// assert_eq!(col.len(), 0);
+     /// ```
+     #[must_use]
+     pub fn len(&self) -> usize {
+-        self.0.len()
++        1 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns `true` if the collection contains no records.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::history::GameCollection;

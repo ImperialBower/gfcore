@@ -1107,4 +1107,345 @@ mod tests {
         // 52 - 7*2 = 38 cards left (minus any book cards removed from hand)
         assert!(game.draw_pile.len() <= 38);
     }
+
+    fn clear_hand(player: &mut Player) {
+        for rank in player.held_ranks() {
+            player.give_cards_of_rank(&rank);
+        }
+    }
+
+    fn three_player_game() -> Game {
+        let players: Vec<Player> = (0..3).map(|i| Player::new(format!("P{i}"))).collect();
+        Game::new(GameVariant::Standard, players).unwrap()
+    }
+
+    // --- handle_ask: book produced from complete ask (line 570) ---
+
+    #[test]
+    fn test_handle_ask_produces_book_when_four_of_a_rank() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        // Player 0 holds 3 Aces; player 1 holds 1 Ace + 1 King.
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[0].receive_card(FrenchBasicCard::ACE_HEARTS);
+        game.players[0].receive_card(FrenchBasicCard::ACE_DIAMONDS);
+        game.players[1].receive_card(FrenchBasicCard::ACE_CLUBS);
+        game.players[1].receive_card(FrenchBasicCard::KING_SPADES);
+
+        let ace_rank = FrenchBasicCard::ACE_SPADES.rank;
+        let result = game
+            .act(PlayerAction::Ask {
+                target: 1,
+                rank: ace_rank,
+            })
+            .unwrap();
+        assert!(
+            matches!(result, GameEvent::Book { .. }),
+            "expected Book event, got {result:?}"
+        );
+        assert_eq!(game.phase, GamePhase::BookCompleted);
+    }
+
+    // --- handle_draw: matched flag (line 637) ---
+
+    #[test]
+    fn test_handle_draw_sets_matched_true_when_rank_matches() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        game.phase = GamePhase::WaitingForDraw;
+        game.last_asked_rank = Some(FrenchBasicCard::ACE_CLUBS.rank);
+        game.draw_pile = BasicPile::from(vec![
+            FrenchBasicCard::ACE_CLUBS,
+            FrenchBasicCard::KING_SPADES,
+        ]);
+        let result = game.act(PlayerAction::Draw).unwrap();
+        assert!(
+            matches!(result, GameEvent::Drew { matched: true, .. }),
+            "expected matched=true, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_handle_draw_sets_matched_false_when_rank_differs() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        game.phase = GamePhase::WaitingForDraw;
+        game.last_asked_rank = Some(FrenchBasicCard::ACE_CLUBS.rank);
+        game.draw_pile = BasicPile::from(vec![FrenchBasicCard::KING_SPADES]);
+        let result = game.act(PlayerAction::Draw).unwrap();
+        assert!(
+            matches!(result, GameEvent::Drew { matched: false, .. }),
+            "expected matched=false, got {result:?}"
+        );
+    }
+
+    // --- replenish_until_has_cards (lines 702-723) ---
+
+    #[test]
+    fn test_replenish_invalid_player_index_returns_false() {
+        let mut game = two_player_game();
+        assert!(!game.replenish_until_has_cards(99));
+    }
+
+    #[test]
+    fn test_replenish_player_with_cards_returns_true_immediately() {
+        let mut game = two_player_game();
+        assert!(game.replenish_until_has_cards(0));
+    }
+
+    #[test]
+    fn test_replenish_empty_hand_empty_pile_returns_false() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        game.draw_pile = BasicPile::default();
+        assert!(!game.replenish_until_has_cards(0));
+    }
+
+    #[test]
+    fn test_replenish_empty_hand_non_empty_pile_returns_true() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        assert!(!game.draw_pile.is_empty());
+        let result = game.replenish_until_has_cards(0);
+        assert!(result);
+        assert!(!game.players[0].hand_is_empty());
+    }
+
+    // --- advance_turn (lines 751, 769) ---
+
+    #[test]
+    fn test_advance_turn_advances_to_next_player_with_cards() {
+        let mut game = two_player_game();
+        game.current_player = 0;
+        game.advance_turn();
+        assert_eq!(game.current_player, 1);
+    }
+
+    #[test]
+    fn test_advance_turn_wraps_around_with_modulo() {
+        // Tests the `(next + 1) % count` arithmetic at the loop body.
+        // current=2 in a 3-player game; first candidate (player 1) has no cards
+        // and pile is empty so the loop must advance via `(1 + 1) % 3 = 2`.
+        let mut game = three_player_game();
+        game.current_player = 0;
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+        game.advance_turn();
+        // Player 1 is skipped (empty hand, pile gone); player 2 still has cards.
+        assert_eq!(game.current_player, 2);
+    }
+
+    #[test]
+    fn test_advance_turn_initial_next_wraps_from_last_player() {
+        // Verifies `(start + 1) % count` at line 747 wraps correctly.
+        let mut game = three_player_game();
+        game.current_player = 2;
+        game.advance_turn();
+        // next = (2 + 1) % 3 = 0; player 0 has cards.
+        assert_eq!(game.current_player, 0);
+    }
+
+    #[test]
+    fn test_advance_turn_skips_empty_handed_player_when_pile_empty() {
+        // Verifies `!hand_is_empty()` check: without the `!` the player with an
+        // empty hand would be chosen instead of skipped.
+        let mut game = three_player_game();
+        game.current_player = 0;
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+        game.advance_turn();
+        assert_eq!(game.current_player, 2);
+        assert!(!game.players[2].hand_is_empty());
+    }
+
+    // --- ensure_current_player_can_ask (lines 791, 797) ---
+
+    #[test]
+    fn test_ensure_current_player_can_ask_no_op_in_waiting_for_draw_phase() {
+        // The guard `phase != WaitingForAsk && phase != BookCompleted` must gate the whole function.
+        let mut game = two_player_game();
+        game.phase = GamePhase::WaitingForDraw;
+        clear_hand(&mut game.players[0]);
+        game.ensure_current_player_can_ask();
+        // Wrong phase — function should return early without advancing or replenishing.
+        assert_eq!(game.current_player, 0);
+        assert!(game.players[0].hand_is_empty());
+    }
+
+    #[test]
+    fn test_ensure_current_player_can_ask_replenishes_from_pile() {
+        // Tests `if !replenish_until_has_cards(cp)` — if the `!` were removed,
+        // a successful replenish would wrongly advance the turn.
+        let mut game = two_player_game();
+        game.phase = GamePhase::WaitingForAsk;
+        clear_hand(&mut game.players[0]);
+        assert!(!game.draw_pile.is_empty());
+        game.ensure_current_player_can_ask();
+        // Replenish succeeded — same player keeps turn and now has cards.
+        assert_eq!(game.current_player, 0);
+        assert!(!game.players[0].hand_is_empty());
+    }
+
+    #[test]
+    fn test_ensure_current_player_can_ask_advances_when_pile_empty() {
+        let mut game = two_player_game();
+        game.phase = GamePhase::WaitingForAsk;
+        clear_hand(&mut game.players[0]);
+        game.draw_pile = BasicPile::default();
+        game.ensure_current_player_can_ask();
+        // Pile empty + hand empty → advance to next player.
+        assert_eq!(game.current_player, 1);
+    }
+
+    // --- collect_books_for_player (line 854) ---
+
+    #[test]
+    fn test_collect_books_for_player_removes_complete_books() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut player = Player::new("Alice");
+        player.receive_card(FrenchBasicCard::ACE_SPADES);
+        player.receive_card(FrenchBasicCard::ACE_HEARTS);
+        player.receive_card(FrenchBasicCard::ACE_DIAMONDS);
+        player.receive_card(FrenchBasicCard::ACE_CLUBS);
+        player.receive_card(FrenchBasicCard::KING_SPADES);
+        Game::collect_books_for_player(&mut player, 4);
+        assert_eq!(player.book_count(), 1);
+        assert_eq!(player.hand_size(), 1);
+    }
+
+    #[test]
+    fn test_collect_books_for_player_no_op_for_mixed_hand() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut player = Player::new("Bob");
+        player.receive_card(FrenchBasicCard::ACE_SPADES);
+        player.receive_card(FrenchBasicCard::KING_SPADES);
+        player.receive_card(FrenchBasicCard::QUEEN_SPADES);
+        Game::collect_books_for_player(&mut player, 4);
+        assert_eq!(player.book_count(), 0);
+        assert_eq!(player.hand_size(), 3);
+    }
+
+    // --- no_productive_ask_exists (line 877) ---
+
+    #[test]
+    fn test_no_productive_ask_exists_false_when_rank_overlap() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::ACE_HEARTS);
+        assert!(!game.no_productive_ask_exists());
+    }
+
+    #[test]
+    fn test_no_productive_ask_exists_true_when_no_overlap() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::KING_HEARTS);
+        assert!(game.no_productive_ask_exists());
+    }
+
+    #[test]
+    fn test_no_productive_ask_exists_true_when_all_hands_empty() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        assert!(game.no_productive_ask_exists());
+    }
+
+    // --- check_win_condition (lines 914-953) ---
+
+    #[test]
+    fn test_check_win_condition_returns_none_when_pile_not_empty() {
+        let mut game = two_player_game();
+        assert!(!game.draw_pile.is_empty());
+        assert!(game.check_win_condition().is_none());
+    }
+
+    #[test]
+    fn test_check_win_condition_returns_none_when_productive_ask_exists() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::ACE_HEARTS);
+        game.draw_pile = BasicPile::default();
+        // Pile empty but overlap exists → no game over.
+        assert!(game.check_win_condition().is_none());
+    }
+
+    #[test]
+    fn test_check_win_condition_game_over_when_all_hands_empty() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+        let result = game.check_win_condition();
+        assert!(result.is_some());
+        assert!(matches!(result.unwrap(), GameEvent::GameOver { .. }));
+        assert_eq!(game.phase, GamePhase::GameOver);
+    }
+
+    #[test]
+    fn test_check_win_condition_winner_has_most_books() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+        game.players[1].add_book(BasicPile::from(vec![
+            FrenchBasicCard::ACE_SPADES,
+            FrenchBasicCard::ACE_HEARTS,
+            FrenchBasicCard::ACE_DIAMONDS,
+            FrenchBasicCard::ACE_CLUBS,
+        ]));
+        let result = game.check_win_condition().unwrap();
+        assert!(
+            matches!(result, GameEvent::GameOver { winner: Some(1) }),
+            "expected winner=Some(1), got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_check_win_condition_tie_gives_no_winner() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+        let book = BasicPile::from(vec![
+            FrenchBasicCard::ACE_SPADES,
+            FrenchBasicCard::ACE_HEARTS,
+            FrenchBasicCard::ACE_DIAMONDS,
+            FrenchBasicCard::ACE_CLUBS,
+        ]);
+        game.players[0].add_book(book.clone());
+        game.players[1].add_book(book);
+        let result = game.check_win_condition().unwrap();
+        assert!(
+            matches!(result, GameEvent::GameOver { winner: None }),
+            "expected winner=None on tie, got {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_check_win_condition_deadlock_triggers_game_over() {
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::KING_HEARTS);
+        game.draw_pile = BasicPile::default();
+        let result = game.check_win_condition();
+        assert!(result.is_some());
+        assert!(matches!(result.unwrap(), GameEvent::GameOver { .. }));
+    }
 }

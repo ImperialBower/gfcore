@@ -1,0 +1,21 @@
+--- src/rules/quartet.rs
++++ replace <= with > in <impl GoFishRules for QuartetRules>::initial_hand_size
+@@ -175,17 +175,17 @@
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};
+     ///
+     /// assert_eq!(QuartetRules.initial_hand_size(4), 8);
+     /// assert_eq!(QuartetRules.initial_hand_size(5), 6);
+     /// ```
+     fn initial_hand_size(&self, player_count: usize) -> usize {
+-        if player_count <= 4 { 8 } else { 6 }
++        if player_count > /* ~ changed by cargo-mutants ~ */ 4 { 8 } else { 6 }
+     }
+ 
+     /// Returns 2: Quartet requires at least 2 players.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};

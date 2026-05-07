@@ -1,0 +1,21 @@
+--- src/history/record.rs
++++ replace GameCollection::from_yaml -> Result<Self, GfError> with Ok(Default::default())
+@@ -332,17 +332,17 @@
+     ///
+     /// let mut col = GameCollection::new();
+     /// col.push(GameRecord::new("Standard", vec!["Alice".to_string()]));
+     /// let yaml = col.to_yaml().expect("serialize");
+     /// let parsed = GameCollection::from_yaml(&yaml).expect("deserialize");
+     /// assert_eq!(col, parsed);
+     /// ```
+     pub fn from_yaml(s: &str) -> Result<Self, GfError> {
+-        serde_norway::from_str(s).map_err(GfError::from)
++        Ok(Default::default()) /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Serializes this collection to a JSON string.
+     ///
+     /// # Errors
+     ///
+     /// Returns [`GfError::ParseError`] if serialization fails.
+     ///

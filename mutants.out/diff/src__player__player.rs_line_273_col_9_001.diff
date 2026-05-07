@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace Player::hand_size -> usize with 1
+@@ -265,17 +265,17 @@
+     ///
+     /// let mut player = Player::new("Iris");
+     /// assert_eq!(player.hand_size(), 0);
+     /// player.receive_card(FrenchBasicCard::ACE_SPADES);
+     /// assert_eq!(player.hand_size(), 1);
+     /// ```
+     #[must_use]
+     pub fn hand_size(&self) -> usize {
+-        self.hand.len()
++        1 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns `true` if this player's hand is empty.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use cardpack::prelude::FrenchBasicCard;

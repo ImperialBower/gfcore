@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ replace >= with < in Game::collect_books_for_player
+@@ -849,17 +849,17 @@
+         false
+     }
+ 
+     /// Drains all completed books from `player`'s hand on game start.
+     fn collect_books_for_player(player: &mut Player, book_size: usize) {
+         let ranks: Vec<Pip> = player.held_ranks();
+         for rank in ranks {
+             let count = player.cards_of_rank(&rank).len();
+-            if count >= book_size {
++            if count < /* ~ changed by cargo-mutants ~ */ book_size {
+                 let book = player.give_cards_of_rank(&rank);
+                 player.add_book(book);
+             }
+         }
+     }
+ 
+     // -----------------------------------------------------------------------
+     // Private helpers — win condition

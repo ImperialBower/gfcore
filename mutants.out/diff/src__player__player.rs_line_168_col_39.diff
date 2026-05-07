@@ -1,0 +1,21 @@
+--- src/player/player.rs
++++ replace == with != in Player::cards_of_rank
+@@ -160,17 +160,17 @@
+     /// let peek = player.cards_of_rank(&ace_rank);
+     /// assert_eq!(peek.len(), 2);
+     /// assert_eq!(player.hand_size(), 2); // hand unchanged
+     /// ```
+     #[must_use]
+     pub fn cards_of_rank(&self, rank: &Pip) -> BasicPile {
+         self.hand
+             .iter()
+-            .filter(|card| &card.rank == rank)
++            .filter(|card| &card.rank != /* ~ changed by cargo-mutants ~ */ rank)
+             .copied()
+             .collect()
+     }
+ 
+     /// Records a completed book, moving it from active play into the player's
+     /// score pile.
+     ///
+     /// The caller is responsible for ensuring that `book` is a valid book

@@ -1,0 +1,21 @@
+--- src/rules/quartet.rs
++++ replace <impl GoFishRules for QuartetRules>::max_players -> usize with 0
+@@ -201,17 +201,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};
+     ///
+     /// assert_eq!(QuartetRules.max_players(), 8);
+     /// ```
+     fn max_players(&self) -> usize {
+-        8
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns `true` if `hand` contains at least one card of the requested rank.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use cardpack::prelude::{BasicPile, FrenchBasicCard};

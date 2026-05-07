@@ -1,0 +1,21 @@
+--- src/game/state.rs
++++ delete ! in Game::check_win_condition
+@@ -908,17 +908,17 @@
+ 
+         // Primary condition: all hands empty.
+         let all_hands_empty = self.players.iter().all(Player::hand_is_empty);
+ 
+         // Secondary condition: no productive ask is possible anywhere.
+         // Checked only when the pile is empty (expensive for large player counts).
+         let deadlocked = !all_hands_empty && self.no_productive_ask_exists();
+ 
+-        if !all_hands_empty && !deadlocked {
++        if  /* ~ changed by cargo-mutants ~ */all_hands_empty && !deadlocked {
+             return None;
+         }
+ 
+         // Find the player(s) with the highest book count.
+         let max_books = self
+             .players
+             .iter()
+             .map(Player::book_count)

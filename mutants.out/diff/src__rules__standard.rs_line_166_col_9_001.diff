@@ -1,0 +1,27 @@
+--- src/rules/standard.rs
++++ replace <impl GoFishRules for StandardRules>::is_book -> bool with false
+@@ -158,23 +158,17 @@
+     ///     .iter()
+     ///     .filter(|c| c.rank == Standard52::basic_pile().v()[0].rank)
+     ///     .take(3)
+     ///     .copied()
+     ///     .collect();
+     /// assert!(!StandardRules.is_book(&partial));
+     /// ```
+     fn is_book(&self, cards: &BasicPile) -> bool {
+-        if cards.len() != self.book_size() {
+-            return false;
+-        }
+-        // SAFETY: len == book_size() >= 1, so index 0 is valid
+-        #[allow(clippy::indexing_slicing)]
+-        let first_rank = cards.v()[0].rank;
+-        cards.v().iter().all(|card| card.rank == first_rank)
++        false /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ use super::GoFishRules;
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;

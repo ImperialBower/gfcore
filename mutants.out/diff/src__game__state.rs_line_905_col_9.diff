@@ -1,0 +1,76 @@
+--- src/game/state.rs
++++ replace Game::check_win_condition -> Option<GameEvent> with None
+@@ -897,72 +897,17 @@
+     /// to [`GamePhase::GameOver`].  Returns the `GameOver` event if the game
+     /// just ended, or `None` if play should continue.
+     ///
+     /// Game over when the draw pile is empty **and** one of the following:
+     /// - Every player has an empty hand (all books are formed), OR
+     /// - No productive ask is possible: no rank held by any player is also
+     ///   held by a different player, making further book formation impossible.
+     fn check_win_condition(&mut self) -> Option<GameEvent> {
+-        if !self.draw_pile.is_empty() {
+-            return None;
+-        }
+-
+-        // Primary condition: all hands empty.
+-        let all_hands_empty = self.players.iter().all(Player::hand_is_empty);
+-
+-        // Secondary condition: no productive ask is possible anywhere.
+-        // Checked only when the pile is empty (expensive for large player counts).
+-        let deadlocked = !all_hands_empty && self.no_productive_ask_exists();
+-
+-        if !all_hands_empty && !deadlocked {
+-            return None;
+-        }
+-
+-        // Find the player(s) with the highest book count.
+-        let max_books = self
+-            .players
+-            .iter()
+-            .map(Player::book_count)
+-            .max()
+-            .unwrap_or(0);
+-        let winners: Vec<usize> = self
+-            .players
+-            .iter()
+-            .enumerate()
+-            .filter(|(_, p)| p.book_count() == max_books)
+-            .map(|(i, _)| i)
+-            .collect();
+-
+-        let winner = if winners.len() == 1 {
+-            winners.first().copied()
+-        } else {
+-            None
+-        };
+-
+-        self.winner = winner;
+-        self.phase = GamePhase::GameOver;
+-
+-        let event = GameEvent::GameOver { winner };
+-        self.last_event = Some(event.clone());
+-
+-        #[cfg(feature = "history")]
+-        {
+-            // Include GameOver in the current turn only if there are already
+-            // events for this turn (i.e., the game ended mid-turn without an
+-            // advance_turn flush).  If the turn was already flushed by
+-            // advance_turn, we don't append a synthetic GameOver-only turn.
+-            if !self.pending_turn_events.is_empty() {
+-                self.pending_turn_events.push(event.clone());
+-            }
+-            self.flush_turn();
+-            self.history.winner = winner;
+-        }
+-
+-        Some(event)
++        None /* ~ changed by cargo-mutants ~ */
+     }
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // Tests
+ // ---------------------------------------------------------------------------
+ 
+ #[cfg(test)]

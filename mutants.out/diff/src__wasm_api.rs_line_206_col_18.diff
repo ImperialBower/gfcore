@@ -1,0 +1,21 @@
+--- src/wasm_api.rs
++++ replace == with != in new_human_vs_bots_game
+@@ -198,17 +198,17 @@
+     bot_count: usize,
+     _seed: f64,
+ ) -> String {
+     let game_variant = match parse_variant(variant) {
+         Ok(v) => v,
+         Err(e) => return error_json(&e),
+     };
+ 
+-    if bot_count == 0 {
++    if bot_count != /* ~ changed by cargo-mutants ~ */ 0 {
+         return error_json("bot_count must be at least 1");
+     }
+ 
+     let mut all_profiles = BotProfile::default_profiles();
+     if bot_count > all_profiles.len() {
+         return error_json(&format!(
+             "bot_count {bot_count} exceeds available default profiles ({})",
+             all_profiles.len()

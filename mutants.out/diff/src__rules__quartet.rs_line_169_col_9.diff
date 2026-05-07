@@ -1,0 +1,21 @@
+--- src/rules/quartet.rs
++++ replace <impl GoFishRules for QuartetRules>::book_size -> usize with 0
+@@ -161,17 +161,17 @@
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};
+     ///
+     /// assert_eq!(QuartetRules.book_size(), 4);
+     /// ```
+     fn book_size(&self) -> usize {
+-        4
++        0 /* ~ changed by cargo-mutants ~ */
+     }
+ 
+     /// Returns the initial hand size: 8 cards for 2–4 players, 6 for 5–8.
+     ///
+     /// # Examples
+     ///
+     /// ```
+     /// use gfcore::rules::{GoFishRules, QuartetRules};
