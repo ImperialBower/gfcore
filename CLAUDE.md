@@ -1,231 +1,132 @@
-# Claude Instructions
+# Claude Instructions for gfcore
 
-These instructions guide Claude to generate code that aligns with our project standards for testing, documentation, and code quality.
+These instructions guide Claude to generate code that aligns with the ImperialBower project standards for testing, documentation, and code quality.
 
-## Testing Requirements
+## Crate Overview
 
-### Unit Tests
-- **Every public function must have at least one unit test** covering the happy path
-- **Every public struct/enum must have tests** that validate construction, methods, and trait implementations
-- Unit tests should be placed in a `#[cfg(test)]` module at the end of the file or in a `tests/` directory
-- Test names should be descriptive and follow the pattern: `<function_or_struct_name>_<scenario>`
-- Include edge cases, error conditions, and boundary conditions
-- Use `assert!`, `assert_eq!`, and `assert_ne!` macros effectively
+`gfcore` is the Go Fish card game engine crate. It is built on `cardpack` v0.7 card primitives and sits alongside `pkcore` (poker engine) in the ImperialBower org. It is a pure library crate — no binaries.
 
-### Doc Tests
-- **Every public function and method must include at least one doc test** demonstrating basic usage
-- Doc tests should be included in the doc comment (`///`) using triple backticks with `rust` syntax highlighting
-- Doc tests must compile and run successfully
-- Doc tests should show the most common usage pattern
-- If a function can fail, include a doc test that shows success cases
-- Doc tests should be runnable with `cargo test --doc`
+## Error Handling
 
-### Example Structure
+- **Never use `unwrap()`, `expect()`, or `panic!()` in library code.**
+- These are acceptable in `#[cfg(test)]` blocks and `examples/`, but not in production paths.
+- All fallible operations must return `Result<T, GfError>`.
+- Use the `?` operator for error propagation throughout library code.
+- Add new variants to `GfError` (in `src/error.rs`) as the domain requires — keep `#[non_exhaustive]`.
+
+## Clippy Lints
+
+The crate root (`src/lib.rs`) carries these crate-level warnings — generated code must not introduce new violations:
+
 ```rust
-/// Brief description of what this function does.
-///
-/// Longer explanation of behavior, parameters, and return values.
-///
-/// # Panics
-/// Panics if the condition X is violated.
-///
-/// # Errors
-/// Returns `Err` if the operation fails due to reason Y.
-///
-/// # Examples
-/// ```
-/// use pkcore::your_module::your_function;
-/// let result = your_function(42);
-/// assert_eq!(result, Ok(expected_value));
-/// ```
-pub fn your_function(param: Type) -> Result<ReturnType, ErrorType> {
-    // implementation
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn your_function_happy_path() {
-        let result = your_function(42);
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn your_function_edge_case() {
-        let result = your_function(0);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn your_function_boundary() {
-        // Test boundary conditions
-        let result = your_function(u32::MAX);
-        assert!(result.is_ok());
-    }
-}
+#![warn(clippy::pedantic)]
+#![warn(clippy::unwrap_used)]
+#![warn(clippy::expect_used)]
 ```
+
+Run `cargo clippy --all-features` before finishing any task and resolve all warnings.
 
 ## Documentation Requirements
 
-### For Functions
-- **Brief summary**: First line should be a concise, single-sentence description
-- **Detailed explanation**: Explain what the function does, why it exists, when to use it, and any important caveats
-- **Parameters**: Document all parameters with their types, ranges, and expected behavior
-- **Return value**: Clearly explain what is returned and under what conditions
-- **Errors**: Document all possible error cases using `# Errors` section with explanation
-- **Panics**: Document if the function can panic using `# Panics` section
-- **Examples**: Include `# Examples` with working doc test code that demonstrates usage
-- **Safety**: Use `# Safety` section if the function is `unsafe`, explaining why it's unsafe and how to use safely
+### Every public function must have a doc test
 
-### For Structs and Enums
-- **Brief description**: Explain the purpose and role of the type in the system
-- **Fields**: Document each field with its purpose and expected invariants
-- **Examples**: Show common construction and usage patterns
-- **Trait implementations**: Explain behavior of implemented traits if non-obvious
-- Include examples showing how to construct and interact with the type
+```rust
+/// Returns whether the requesting player's hand contains the asked-for rank.
+///
+/// # Errors
+///
+/// Returns [`GfError::InvalidPlayer`] if `player_id` is out of range.
+///
+/// # Examples
+///
+/// ```
+/// use gfcore::prelude::*;
+/// // example showing success case
+/// ```
+pub fn has_rank(player_id: usize, rank: u8) -> Result<bool, GfError> { ... }
+```
 
-### For Modules
-- **Module-level documentation**: Each module file should start with a module-level doc comment explaining its purpose
-- Example: `//! Handles poker hand ranking and comparison logic.`
-- Include examples of common usage patterns for the module
+- Doc tests must compile and pass under `cargo test --doc`.
+- The `# Errors` section is required for every function returning `Result`.
+- The `# Panics` section is required if the function can panic (which should be rare — see Error Handling above).
 
-### For Crate Root (lib.rs)
-- **Comprehensive overview**: Explain the crate's purpose and main concepts
-- **Module organization**: Link to key modules and their purposes
-- **Quick start guide**: Show how to get started with the crate
-- **Examples**: Provide complete working examples of common tasks
+### Module-level docs
 
-## Code Quality Standards
+Every module file opens with a `//!` module doc comment explaining its purpose.
 
-### Naming Conventions
-- Use clear, descriptive names for functions, variables, and types
-- Use `snake_case` for functions, variables, and module names
-- Use `PascalCase` for types, structs, enums, and traits
-- Avoid single-letter variable names except for loop indices (i, j, k)
-- Use full words in variable names (e.g., `cards` instead of `c`, `rank` instead of `r`)
+### Crate root (`src/lib.rs`)
 
-### Error Handling
-- **Never use `unwrap()`, `expect()`, or `panic!()` in library code**
-- It's acceptable to use these in tests if testing, but not in production code
-- Prefer `Result<T, E>` over `Option<T>` for operations that can fail with meaningful errors
-- Create custom error types for domain-specific errors
-- Implement `std::error::Error` for custom error types
-- Document all error cases clearly
-- Use `?` operator for error propagation in library code
+The crate root has a complete crate-level overview doc comment (`//!`) with a Quick Start example.
 
-### Trait Implementations
-- Implement `Display` for user-facing types (those that will be shown to users)
-- Implement `Debug` for all public types
-- Implement `Default` for types that have a sensible default value
-- Implement `Clone` and `Copy` when semantically appropriate
-- Document non-obvious trait behavior in the trait implementation
+## Naming Conventions
 
-### Code Organization
-- Keep functions focused and single-purpose
-- Extract complex logic into well-named helper functions
-- Group related functions and types in logical modules
-- Use visibility modifiers (`pub`, `pub(crate)`, private) appropriately
+- `snake_case` for functions, variables, module names.
+- `PascalCase` for types, structs, enums, traits.
+- No single-letter variable names outside loop indices (`i`, `j`, `k`).
+- Prefer full English words (`player` not `plyr`, `rank` not `rk`).
 
-## Rust-Specific Guidelines
+## File Organisation
 
-### Working with References
-- Prefer `&T` (borrowing) over `T` (taking ownership) when possible
-- Use `&mut T` only when mutation is needed
-- Document borrowing requirements in function documentation
-- Consider lifetime requirements for complex references
+Prefer **domain-grouped files** over one-type-per-file:
 
-### Performance Considerations
-- Avoid unnecessary cloning; use references when possible
-- Use `&[T]` for slices instead of `&Vec<T>`
-- Pre-allocate collections with `with_capacity()` when size is known
-- Document performance characteristics for expensive operations
+- `src/error/mod.rs` — all error types
+- `src/rules/mod.rs` — rule variants and configuration structs
+- `src/game/mod.rs` — game state machine, `Game` struct, actions, phases
+- `src/player/mod.rs` — `Player`, hand management, scoring
+- `src/bot/mod.rs` — bot strategies and the `BotStrategy` trait
+- `src/history/mod.rs` — history recording (feature-gated on `history`)
+- `src/prelude.rs` — public re-exports for ergonomic imports
 
-### Type Safety
-- Use type-safe abstractions instead of primitive types when semantically meaningful
-- Use enums instead of strings for fixed sets of values
-- Leverage Rust's type system to prevent invalid states at compile time
+Use subdirectory modules (`foo/mod.rs`) rather than flat files (`foo.rs`) for all modules; each subdirectory module will gain sub-files as the module grows.
 
-## Checklist for Code Generation
+## Testing
 
-Before accepting or suggesting code:
-- ✓ Does the function have comprehensive doc comments with `# Examples`?
-- ✓ Are there unit tests covering happy path, edge cases, and error conditions?
-- ✓ Are there doc tests in the doc comments that compile and run?
-- ✓ Are all error cases handled and documented?
-- ✓ Does the code avoid `unwrap()`, `expect()`, and `panic!()` in library code?
-- ✓ Are edge cases and boundary conditions covered in tests?
-- ✓ Is the code readable and maintainable?
-- ✓ Are all public APIs documented with examples?
-- ✓ Do tests run successfully with `cargo test`?
-- ✓ Do doc tests pass with `cargo test --doc`?
-- ✓ Does the code follow naming conventions?
-- ✓ Are trait implementations documented if behavior is non-obvious?
+### Unit tests
 
-## Testing Commands
+- Placed in a `#[cfg(test)]` block at the bottom of the file being tested, **or** in `tests/<module>_tests.rs`.
+- Every public struct/enum/function has at least one unit test covering the happy path.
+- Test names follow: `test_<subject>_<scenario>` (e.g. `test_game_new_default_player_count`).
+- Include edge cases, error conditions, and boundary conditions.
+
+### Integration tests
+
+- Live in `tests/` at the crate root.
+- Cover multi-module interactions and feature-flag combinations.
+
+### Running tests
 
 ```bash
-# Run all tests
-cargo test
-
-# Run doc tests only
-cargo test --doc
-
-# Run tests with output
-cargo test -- --nocapture
-
-# Run specific test
-cargo test test_function_name
-
-# Run tests with specific number of threads
-cargo test -- --test-threads=1
-
-# Run tests matching a pattern
-cargo test function_name
+cargo test                      # all tests
+cargo test --doc                # doc tests only
+cargo clippy --all-features     # lint check
+cargo test -- --nocapture       # with stdout
 ```
 
-## Common Patterns to Use
+## Trait Implementations
 
-### Result Type for Fallible Operations
-```rust
-pub fn operation(param: Type) -> Result<ReturnType, ErrorType> {
-    // implementation
-}
-```
+- Implement `Display` for any type shown to users.
+- Implement `Debug` for all public types (derive if possible).
+- Implement `Default` where there is a sensible zero-state.
+- Implement `Clone` when callers may need snapshots of game state.
 
-### Option Type for Optional Values
-```rust
-pub fn find_value(key: &str) -> Option<Value> {
-    // implementation
-}
-```
+## Feature Gates
 
-### Custom Error Type
-```rust
-#[derive(Debug)]
-pub enum MyError {
-    InvalidInput(String),
-    NotFound,
-}
+- `history` (default): enables `uuid` and `serde_norway`; guards `src/history/mod.rs`.
+- `wasm`: enables `wasm-bindgen`, `console_error_panic_hook`, `getrandom/wasm_js`.
 
-impl std::fmt::Display for MyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            MyError::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
-            MyError::NotFound => write!(f, "Not found"),
-        }
-    }
-}
+Code that requires a feature must be wrapped in `#[cfg(feature = "...")]`.
 
-impl std::error::Error for MyError {}
-```
+## Checklist Before Finishing Any Task
+
+- [ ] All new public functions have doc comments with `# Examples` and `# Errors`.
+- [ ] Doc tests compile and pass (`cargo test --doc`).
+- [ ] Unit tests cover happy path, edge cases, and error conditions.
+- [ ] No `unwrap()` / `expect()` / `panic!()` outside `#[cfg(test)]`.
+- [ ] `cargo clippy --all-features` reports no warnings.
+- [ ] `cargo test` passes.
 
 ## References
 
 - [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
-- [Rust Book - Error Handling](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
-- [Rust by Example: Documentation](https://doc.rust-lang.org/rust-by-example/meta/doc.html)
-- [Writing Unsafe Rust](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html)
-- [Effective Rust](https://effective-rust.dev/)
-
+- [cardpack docs](https://docs.rs/cardpack/0.7.0)
+- [pkcore](https://github.com/ImperialBower/pkcore) — sibling poker engine, same standards

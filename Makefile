@@ -1,6 +1,4 @@
-.PHONY: default help clean build test build_test fmt clippy update tree tree-duplicates deny audit unused-deps create_docs docs install-tools watch install-watch ayce
-
-CRATE_NAME := $(shell grep '^name' Cargo.toml 2>/dev/null | head -1 | sed 's/.*"\(.*\)".*/\1/' | tr '-' '_')
+.PHONY: clean build test test-unit test-doc build-wasm test-wasm coverage build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri mutants tree tree-duplicates deny audit unused-deps install-tools install-nextest install-mutants install-llvm-cov install-wasm-bindgen-cli watch install-watch
 
 # Default target
 default: ayce
@@ -8,35 +6,46 @@ default: ayce
 # Display help information
 help:
 	@echo "Available targets:"
-	@echo ""
-	@echo "Build & Test:"
+	@echo "  make (default)       - Run ayce"
 	@echo "  make build           - Build the project"
-	@echo "  make test            - Run tests"
-	@echo "  make build_test      - Clean once, then build and test"
 	@echo "  make clean           - Clean build artifacts"
-	@echo "  make ayce            - Run all checks (fmt -> build_test -> clippy -> deny -> create_docs)"
-	@echo ""
-	@echo "Code Quality & Security:"
+	@echo "  make test            - Run all tests (nextest for unit, cargo test for doc)"
+	@echo "  make test-unit       - Run unit tests via cargo-nextest"
+	@echo "  make test-doc        - Run doc tests via cargo test --doc"
+	@echo "  make build-wasm      - Build for wasm32-unknown-unknown with --features wasm"
+	@echo "  make test-wasm       - Run wasm runtime tests (requires wasm-bindgen-cli + node)"
+	@echo "  make coverage        - Generate test coverage report via cargo-llvm-cov"
+	@echo "  make build_test      - Clean once, then build and test"
 	@echo "  make fmt             - Format code"
-	@echo "  make clippy          - Run clippy linter"
-	@echo "  make update          - Update dependencies"
-	@echo "  make tree            - Show workspace dependency tree"
+	@echo "  make clippy          - Run clippy linter (all features)"
+	@echo "  make create_docs     - Build documentation"
+	@echo "  make docs            - Build docs and open in browser"
+	@echo "  make ayce            - Run fmt, build_test, clippy, and docs"
+	@echo "  make help            - Display this help message"
+	@echo ""
+	@echo "Nightly:"
+	@echo "  make test-nightly    - Run all tests with nightly"
+	@echo "  make clippy-nightly  - Run clippy with nightly and deny warnings"
+	@echo "  make nightly         - Run nightly test and clippy checks"
+	@echo "  make miri            - Run tests under Miri"
+	@echo "  make mutants         - Run mutation tests via cargo-mutants"
+	@echo "  make unused-deps     - Find unused dependencies with cargo-udeps"
+	@echo ""
+	@echo "Dependencies and Security:"
+	@echo "  make tree            - Show dependency tree"
 	@echo "  make tree-duplicates - Show duplicate dependencies"
-	@echo "  make deny            - Run cargo-deny checks"
-	@echo "  make audit           - Run advisory security audit"
-	@echo "  make unused-deps     - Check for unused dependencies (nightly)"
+	@echo "  make deny            - Run full cargo-deny checks"
+	@echo "  make audit           - Run advisory-only security audit"
 	@echo ""
-	@echo "Documentation:"
-	@echo "  make create_docs     - Create documentation"
-	@echo "  make docs            - Create docs and open in browser (macOS/Linux)"
-	@echo ""
-	@echo "Tooling:"
-	@echo "  make install-tools   - Install cargo-deny, cargo-udeps, and cargo-watch"
-	@echo "  make watch           - Run check/test in watch mode"
+	@echo "Tools and Workflow:"
+	@echo "  make install-tools   - Install cargo-deny, cargo-udeps, cargo-nextest, and cargo-mutants"
+	@echo "  make install-nextest - Install cargo-nextest"
+	@echo "  make install-mutants - Install cargo-mutants"
+	@echo "  make install-wasm-bindgen-cli - Install wasm-bindgen-cli (for test-wasm)"
+	@echo "  make install-llvm-cov - Install cargo-llvm-cov (for coverage)"
+	@echo "  make watch           - Run cargo-watch for check/test loop"
 	@echo "  make install-watch   - Install cargo-watch"
 	@echo ""
-	@echo "Meta:"
-	@echo "  make help            - Display this help message"
 
 # Clean build artifacts
 clean:
@@ -46,9 +55,112 @@ clean:
 build:
 	cargo build
 
-# Run tests
-test:
-	cargo test
+# Check for cargo-nextest, prompt to install if missing
+define check_nextest
+	@if ! cargo nextest --version >/dev/null 2>&1; then \
+		echo "cargo-nextest is not installed."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install cargo-nextest --locked; \
+		else \
+			echo "Aborting: cargo-nextest is required for unit tests."; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+# Run unit tests via nextest
+test-unit:
+	$(check_nextest)
+	cargo nextest run --all-features
+
+# Run doc tests
+test-doc:
+	cargo test --doc --all-features
+
+# Run all tests: unit tests via nextest, doc tests via cargo test
+test: test-unit test-doc
+
+# Build gfcore for wasm32-unknown-unknown with the wasm feature.
+build-wasm:
+	@if ! rustup target list --installed | grep -q '^wasm32-unknown-unknown$$'; then \
+		echo "Installing wasm32-unknown-unknown target..."; \
+		rustup target add wasm32-unknown-unknown; \
+	fi
+	cargo build --target wasm32-unknown-unknown --features wasm
+
+# Check for wasm-bindgen-test-runner, prompt to install if missing.
+# wasm-bindgen-test-runner is bundled with wasm-bindgen-cli.
+define check_wasm_bindgen_cli
+	@if ! command -v wasm-bindgen-test-runner >/dev/null 2>&1; then \
+		echo "wasm-bindgen-cli is not installed (provides wasm-bindgen-test-runner)."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install wasm-bindgen-cli; \
+		else \
+			echo "Aborting: wasm-bindgen-cli is required for wasm runtime tests."; \
+			exit 1; \
+		fi; \
+	fi
+	@if ! command -v node >/dev/null 2>&1; then \
+		echo "Aborting: node is required for wasm runtime tests."; \
+		exit 1; \
+	fi
+endef
+
+# Run wasm runtime tests under node-headless via wasm-bindgen-test.
+test-wasm:
+	@if ! rustup target list --installed | grep -q '^wasm32-unknown-unknown$$'; then \
+		echo "Installing wasm32-unknown-unknown target..."; \
+		rustup target add wasm32-unknown-unknown; \
+	fi
+	$(check_wasm_bindgen_cli)
+	cargo test --target wasm32-unknown-unknown --test wasm --features wasm
+
+# Check for cargo-llvm-cov, prompt to install if missing.
+define check_llvm_cov
+	@if ! cargo llvm-cov --version >/dev/null 2>&1; then \
+		echo "cargo-llvm-cov is not installed."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install cargo-llvm-cov; \
+		else \
+			echo "Aborting: cargo-llvm-cov is required for coverage."; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+# Generate a coverage report (HTML by default; CI uses --lcov).
+# Run with COVERAGE_FORMAT=lcov to mirror the CI output format.
+coverage:
+	$(check_llvm_cov)
+	cargo llvm-cov --all-features --workspace --html
+	@echo ""
+	@echo "Coverage report: target/llvm-cov/html/index.html"
+
+# Check for cargo-mutants, prompt to install if missing
+define check_mutants
+	@if ! cargo mutants --version >/dev/null 2>&1; then \
+		echo "cargo-mutants is not installed."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install cargo-mutants; \
+		else \
+			echo "Aborting: cargo-mutants is required for mutation testing."; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+# Run mutation tests
+mutants:
+	$(check_mutants)
+	cargo mutants
 
 # Clean once, then run build + test
 build_test: clean build test
@@ -59,12 +171,19 @@ fmt:
 
 # Run clippy linter
 clippy:
-	cargo clippy -- -Dclippy::all -Dclippy::pedantic
+	cargo clippy --all-features -- -D warnings
 
-# Update dependencies
-update:
-	@echo "Updating dependencies..."
-	cargo update
+test-nightly:
+	cargo +nightly test --all-targets --all-features
+
+clippy-nightly:
+	cargo +nightly clippy --lib --all-features -- -D warnings
+
+nightly: test-nightly clippy-nightly
+
+# Run tests under Miri
+miri:
+	cargo miri test
 
 # Show dependency tree
 tree:
@@ -93,15 +212,11 @@ unused-deps:
 
 # Create documentation
 create_docs:
-	cargo doc --no-deps
+	cargo doc --no-deps --all-features
 
 # Open documentation in browser
 docs: create_docs
-	@if [ -z "$(CRATE_NAME)" ]; then \
-		echo "Error: Could not determine crate name. Have you run 'cargo init'?"; \
-		exit 1; \
-	fi; \
-	DOC_PATH="./target/doc/$(CRATE_NAME)/index.html"; \
+	@DOC_PATH="./target/doc/gfcore/index.html"; \
 	if command -v xdg-open >/dev/null 2>&1; then \
 		xdg-open "$$DOC_PATH"; \
 	elif command -v open >/dev/null 2>&1; then \
@@ -112,14 +227,34 @@ docs: create_docs
 		exit 1; \
 	fi
 
+# All You Can Eat - Run all checks
+ayce: fmt build_test clippy create_docs
+
+# Install cargo-nextest
+install-nextest:
+	cargo install cargo-nextest --locked
+
+# Install cargo-mutants
+install-mutants:
+	cargo install cargo-mutants
+
+# Install wasm-bindgen-cli (provides wasm-bindgen-test-runner used by `make test-wasm`)
+install-wasm-bindgen-cli:
+	cargo install wasm-bindgen-cli
+
+# Install cargo-llvm-cov (used by `make coverage`)
+install-llvm-cov:
+	cargo install cargo-llvm-cov
+
 # Install required tools
 install-tools:
 	@echo "Installing development tools..."
 	cargo install cargo-deny
 	cargo install cargo-udeps
-	cargo install cargo-watch
+	cargo install cargo-nextest --locked
+	cargo install cargo-mutants
 	@echo ""
-	@echo "✓ Tools installed!"
+	@echo "Tools installed!"
 	@echo ""
 
 # Watch mode for development (requires cargo-watch)
@@ -129,7 +264,3 @@ watch:
 # Install cargo-watch
 install-watch:
 	cargo install cargo-watch
-
-
-# All You Can Eat - Run all checks
-ayce: fmt build_test clippy deny create_docs
