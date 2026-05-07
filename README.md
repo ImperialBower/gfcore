@@ -10,3 +10,7 @@
 
 Go Fish card game engine for the ImperialBower project ecosystem.
 
+## Backstory
+
+This is an experiment in using AI code generation to create a very simple mirror to my 
+[pkcore](https://github.com/ImperialBower/pkcore) poker library for a different card game. 
