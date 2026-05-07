@@ -7,7 +7,21 @@ rust-version = "1.85"
 license = "GPL-3.0-or-later"
 repository  = "https://github.com/ImperialBower/gfcore.git"
 homepage = "https://github.com/ImperialBower/gfcore"
-exclude = [".github/*", "docs/*", "examples/*", ".gitignore", "Cargo.lock", ".claude/*", "Claude.md"]
+keywords    = ["go-fish", "card-game", "game-engine", "cards", "board-game"]
+categories  = ["games", "simulation"]
+exclude = [
+    ".github/*",
+    ".devcontainer/*",
+    ".claude/*",
+    "docs/*",
+    "examples/*",
+    "src/examples/*",
+    "deny.toml",
+    "Makefile",
+    ".gitignore",
+    "Cargo.lock",
+    "CLAUDE.md",
+]
 
 [features]
 default = ["history"]

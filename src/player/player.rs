@@ -29,8 +29,6 @@ pub struct Player {
     /// Completed books, each stored as a [`BasicPile`] of `book_size` cards.
     books: Vec<BasicPile>,
     /// `None` for a human player; `Some` for a bot.
-    ///
-    /// TODO(Step 6): replace with the full `BotProfile` implementation.
     pub profile: Option<BotProfile>,
 }
 

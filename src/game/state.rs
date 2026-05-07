@@ -66,7 +66,7 @@ pub enum GamePhase {
 ///
 /// [`Game::act`] returns the most recently emitted event for that action.
 /// Observers can use a sequence of events to reconstruct the full game
-/// history (Step 7 adds formal history recording).
+/// history; the `history` feature enables structured turn-by-turn recording.
 ///
 /// # Examples
 ///
