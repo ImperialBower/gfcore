@@ -1449,4 +1449,54 @@ mod tests {
         assert!(result.is_some());
         assert!(matches!(result.unwrap(), GameEvent::GameOver { .. }));
     }
+
+    // --- check_win_condition: history feature — pending_turn_events logic (line 954) ---
+
+    /// Game ends mid-turn: GameOver must be appended to the existing pending
+    /// turn before flush so the turn record is complete.
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_check_win_condition_gameover_appended_to_pending_turn() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+
+        // Simulate mid-turn by injecting a sentinel event into the accumulator.
+        game.pending_turn_events
+            .push(GameEvent::GoFish { player: 0 });
+
+        game.check_win_condition();
+
+        let last_turn = game.history.turns.last().expect("expected a flushed turn");
+        assert!(
+            last_turn
+                .events
+                .iter()
+                .any(|e| matches!(e, GameEvent::GameOver { .. })),
+            "GameOver must be in the last turn when pending events existed: {last_turn:?}"
+        );
+    }
+
+    /// Game ends after advance_turn already flushed: no synthetic GameOver-only
+    /// turn should be created.
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_check_win_condition_no_synthetic_turn_when_pending_empty() {
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.draw_pile = BasicPile::default();
+
+        assert!(game.pending_turn_events.is_empty());
+        let turns_before = game.history.turns.len();
+
+        game.check_win_condition();
+
+        assert_eq!(
+            game.history.turns.len(),
+            turns_before,
+            "no synthetic GameOver-only turn should be added when pending events were empty"
+        );
+    }
 }
