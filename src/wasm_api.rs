@@ -76,7 +76,7 @@ fn parse_variant(s: &str) -> Result<GameVariant, String> {
 /// # Examples (JavaScript)
 ///
 /// ```javascript
-/// console.log(version()); // "0.1.0"
+/// console.log(version()); // e.g. "0.0.1" — returns the crate version string
 /// ```
 #[must_use]
 #[wasm_bindgen]
@@ -388,8 +388,11 @@ pub fn step_bot() -> String {
 
 /// Returns the full game history as YAML.
 ///
-/// Returns `{"error":"..."}` if no game is in progress, the game is not yet
-/// over, or the `history` feature is not enabled.
+/// Works for both in-progress and completed games; call at any time after
+/// [`new_game`] to snapshot the current history.
+///
+/// Returns `{"error":"..."}` if no game is in progress or the `history`
+/// feature is not enabled.
 ///
 /// # Examples (JavaScript)
 ///

@@ -219,7 +219,7 @@ fn new_human_vs_bots_game_returns_valid_state() {
 /// the current player — confirming no bot profile is set for slot 0.
 #[wasm_bindgen_test]
 fn new_human_vs_bots_game_step_bot_done_on_human_turn() {
-    new_human_vs_bots_game("Standard", "You", 3, 0.0);
+    let _init = new_human_vs_bots_game("Standard", "You", 3, 0.0);
     // Game always starts with player 0's turn.
     let result = parse(&step_bot());
     assert!(!is_error(&result), "step_bot must not error");
