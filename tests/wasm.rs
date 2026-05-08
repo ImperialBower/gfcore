@@ -9,12 +9,13 @@
 //! To run locally:
 //!
 //! ```sh
-//! cargo install wasm-bindgen-cli          # one-time
-//! cargo test --target wasm32-unknown-unknown --test wasm --features wasm
+//! cargo install wasm-bindgen-cli          # one-time; version must match Cargo.lock
+//! CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner \
+//!   cargo test --target wasm32-unknown-unknown --test wasm --features wasm
 //! ```
 //!
-//! `.cargo/config.toml` sets the `runner` to `wasm-bindgen-test-runner` so
-//! `cargo test` dispatches automatically.
+//! `.cargo/config.toml` sets the runner automatically if present (it is tracked
+//! in the repo via a `.gitignore` negation rule).
 
 #![cfg(target_arch = "wasm32")]
 

@@ -16,3 +16,4 @@
 /mutants.out
 
 /.cargo/
+!/.cargo/config.toml

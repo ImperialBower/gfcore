@@ -105,3 +105,5 @@ jobs:
       - name: Install wasm-bindgen-cli
         run: cargo install wasm-bindgen-cli --version "$(cargo pkgid wasm-bindgen | cut -d'@' -f2)" --locked
       - run: cargo test --target wasm32-unknown-unknown --test wasm --features wasm
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner
