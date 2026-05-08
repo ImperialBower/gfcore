@@ -42,6 +42,7 @@ thread_local! {
 
 /// Installs the `console_error_panic_hook` so that Rust panics appear in the
 /// browser console rather than being silently swallowed.
+#[mutants::skip] // panic-hook installation is not observable from Rust tests
 #[wasm_bindgen(start)]
 pub fn wasm_init() {
     console_error_panic_hook::set_once();
@@ -439,5 +440,314 @@ pub fn parse_game_collection(yaml: &str) -> String {
     {
         let _ = yaml;
         error_json("history feature is not enabled")
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Clears all thread-local game state between tests.
+    ///
+    /// Rust's test runner reuses OS threads across tests, so thread-locals can
+    /// carry state from one test into another.  Call this at the top of any
+    /// test that depends on a clean initial state.
+    fn reset_state() {
+        GAME.with(|g| *g.borrow_mut() = None);
+        PROFILES.with(|p| p.borrow_mut().clear());
+        LAST_EVENT.with(|le| *le.borrow_mut() = None);
+    }
+
+    fn is_error_json(s: &str) -> bool {
+        s.contains("\"error\"")
+    }
+
+    fn parse(json: &str) -> serde_json::Value {
+        serde_json::from_str(json).unwrap_or(serde_json::Value::Null)
+    }
+
+    // --- error_json ---
+
+    #[test]
+    fn test_error_json_contains_error_key_and_message() {
+        let result = error_json("something went wrong");
+        assert!(is_error_json(&result));
+        let v = parse(&result);
+        assert!(
+            v["error"].as_str().is_some(),
+            "error field must be a string: {result}"
+        );
+    }
+
+    // --- parse_variant ---
+
+    #[test]
+    fn test_parse_variant_standard() {
+        assert!(matches!(parse_variant("Standard"), Ok(GameVariant::Standard)));
+    }
+
+    #[test]
+    fn test_parse_variant_happy_families() {
+        assert!(matches!(
+            parse_variant("HappyFamilies"),
+            Ok(GameVariant::HappyFamilies)
+        ));
+    }
+
+    #[test]
+    fn test_parse_variant_quartet() {
+        assert!(matches!(parse_variant("Quartet"), Ok(GameVariant::Quartet)));
+    }
+
+    #[test]
+    fn test_parse_variant_unknown_returns_err() {
+        assert!(parse_variant("Unknown").is_err());
+    }
+
+    // --- version ---
+
+    #[test]
+    fn test_version_matches_cargo_pkg_version() {
+        assert_eq!(version(), env!("CARGO_PKG_VERSION"));
+    }
+
+    // --- new_game ---
+
+    #[test]
+    fn test_new_game_valid_returns_state_json() {
+        reset_state();
+        let result = new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
+        assert!(!is_error_json(&result), "unexpected error: {result}");
+        let v = parse(&result);
+        assert_eq!(v["phase"], "WaitingForAsk");
+        assert_eq!(v["current_player"], 0);
+    }
+
+    #[test]
+    fn test_new_game_unknown_variant_returns_error() {
+        let result = new_game("Bogus", r#"["Alice","Bob"]"#, 0.0);
+        assert!(is_error_json(&result));
+    }
+
+    #[test]
+    fn test_new_game_bad_names_json_returns_error() {
+        let result = new_game("Standard", "not-json", 0.0);
+        assert!(is_error_json(&result));
+    }
+
+    // --- new_bot_game ---
+
+    #[test]
+    fn test_new_bot_game_valid_returns_state_json() {
+        reset_state();
+        let result = new_bot_game("Standard", 2, 0.0);
+        assert!(!is_error_json(&result), "unexpected error: {result}");
+        let v = parse(&result);
+        assert_eq!(v["phase"], "WaitingForAsk");
+        assert_eq!(v["players"].as_array().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn test_new_bot_game_at_profile_limit_succeeds() {
+        // bot_count == limit must succeed; catches the >= mutation on the > guard.
+        reset_state();
+        let limit = BotProfile::default_profiles().len();
+        let result = new_bot_game("Standard", limit, 0.0);
+        assert!(!is_error_json(&result), "bot_count at limit should succeed: {result}");
+    }
+
+    #[test]
+    fn test_new_bot_game_exceeds_profile_limit_returns_error() {
+        // bot_count > limit must error; catches the == mutation on the > guard.
+        let limit = BotProfile::default_profiles().len();
+        let result = new_bot_game("Standard", limit + 1, 0.0);
+        assert!(is_error_json(&result), "bot_count over limit should error: {result}");
+    }
+
+    // --- new_human_vs_bots_game ---
+
+    #[test]
+    fn test_new_human_vs_bots_game_valid_returns_state_json() {
+        reset_state();
+        let result = new_human_vs_bots_game("Standard", "Alice", 2, 0.0);
+        assert!(!is_error_json(&result), "unexpected error: {result}");
+        let v = parse(&result);
+        assert_eq!(v["players"].as_array().unwrap().len(), 3);
+        assert_eq!(v["players"][0]["name"], "Alice");
+    }
+
+    #[test]
+    fn test_new_human_vs_bots_game_zero_bots_returns_error() {
+        // Catches the != mutation on the bot_count == 0 guard.
+        let result = new_human_vs_bots_game("Standard", "Alice", 0, 0.0);
+        assert!(is_error_json(&result));
+    }
+
+    #[test]
+    fn test_new_human_vs_bots_game_one_bot_succeeds() {
+        // bot_count=1 must succeed; catches the != mutation (which would wrongly error).
+        reset_state();
+        let result = new_human_vs_bots_game("Standard", "Alice", 1, 0.0);
+        assert!(!is_error_json(&result), "1 bot should succeed: {result}");
+    }
+
+    #[test]
+    fn test_new_human_vs_bots_game_at_profile_limit_succeeds() {
+        // bot_count == limit must succeed; catches the >= mutation on the > guard.
+        reset_state();
+        let limit = BotProfile::default_profiles().len();
+        let result = new_human_vs_bots_game("Standard", "Alice", limit, 0.0);
+        assert!(!is_error_json(&result), "bot_count at limit should succeed: {result}");
+    }
+
+    #[test]
+    fn test_new_human_vs_bots_game_exceeds_profile_limit_returns_error() {
+        // bot_count > limit must error; catches the == mutation on the > guard.
+        let limit = BotProfile::default_profiles().len();
+        let result = new_human_vs_bots_game("Standard", "Alice", limit + 1, 0.0);
+        assert!(is_error_json(&result), "bot_count over limit should error: {result}");
+    }
+
+    // --- act ---
+
+    #[test]
+    fn test_act_bad_json_returns_error() {
+        let result = act("not-json");
+        assert!(is_error_json(&result));
+    }
+
+    #[test]
+    fn test_act_no_game_in_progress_returns_error() {
+        reset_state();
+        let result = act("\"Draw\"");
+        assert!(is_error_json(&result));
+    }
+
+    #[test]
+    fn test_act_wrong_phase_returns_error() {
+        reset_state();
+        new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
+        // Game starts in WaitingForAsk; Draw is invalid in this phase.
+        let result = act("\"Draw\"");
+        assert!(is_error_json(&result), "Draw in WaitingForAsk should error: {result}");
+    }
+
+    // --- get_state ---
+
+    #[test]
+    fn test_get_state_no_game_returns_error() {
+        reset_state();
+        let result = get_state();
+        assert!(is_error_json(&result));
+    }
+
+    #[test]
+    fn test_get_state_after_new_game_returns_state_json() {
+        reset_state();
+        new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
+        let result = get_state();
+        assert!(!is_error_json(&result), "unexpected error: {result}");
+        let v = parse(&result);
+        assert_eq!(v["phase"], "WaitingForAsk");
+    }
+
+    // --- step_bot ---
+
+    #[test]
+    fn test_step_bot_no_game_returns_done() {
+        reset_state();
+        // Missing game is treated as "done" (no bot to step).
+        assert_eq!(step_bot(), "{\"done\":true}");
+    }
+
+    #[test]
+    fn test_step_bot_human_player_returns_done() {
+        reset_state();
+        new_human_vs_bots_game("Standard", "Alice", 2, 0.0);
+        // Player 0 is human — no bot profile, so step_bot must return done:true.
+        let result = step_bot();
+        let v = parse(&result);
+        assert_eq!(v["done"], true, "human turn must return done:true: {result}");
+    }
+
+    #[test]
+    fn test_step_bot_bot_game_returns_valid_response() {
+        reset_state();
+        new_bot_game("Standard", 2, 0.0);
+        let result = step_bot();
+        assert!(!is_error_json(&result), "step_bot must not error: {result}");
+        let v = parse(&result);
+        assert!(v.get("done").is_some(), "must have 'done' key: {result}");
+    }
+
+    /// Exercises the `state.phase == WaitingForDraw` branch in `step_bot`.
+    ///
+    /// With the `== → !=` mutation the bot would call `decide()` (returning an
+    /// Ask action) instead of `Draw`, causing an `OutOfTurn` error from the
+    /// game engine.  Asserting no error here catches that mutation.
+    #[test]
+    fn test_step_bot_draws_when_in_waiting_for_draw_phase() {
+        reset_state();
+        new_bot_game("Standard", 2, 0.0);
+        for _ in 0..500 {
+            let state = parse(&get_state());
+            match state["phase"].as_str().unwrap_or("") {
+                "GameOver" => return,
+                "WaitingForDraw" => {
+                    let result = step_bot();
+                    assert!(
+                        !is_error_json(&result),
+                        "step_bot in WaitingForDraw must not error: {result}"
+                    );
+                    let v = parse(&result);
+                    assert_eq!(v["done"], false, "expected done=false: {result}");
+                    return;
+                }
+                _ => {
+                    step_bot();
+                }
+            }
+        }
+    }
+
+    // --- get_game_yaml ---
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_get_game_yaml_no_game_returns_error() {
+        reset_state();
+        let result = get_game_yaml();
+        assert!(is_error_json(&result));
+    }
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_get_game_yaml_with_active_game_returns_yaml() {
+        reset_state();
+        new_bot_game("Standard", 2, 0.0);
+        let result = get_game_yaml();
+        assert!(!is_error_json(&result), "get_game_yaml must not error: {result}");
+        assert!(!result.is_empty(), "yaml must not be empty");
+    }
+
+    // --- parse_game_collection ---
+
+    #[test]
+    fn test_parse_game_collection_invalid_input_returns_error() {
+        let result = parse_game_collection("definitely not a game collection");
+        assert!(is_error_json(&result));
+    }
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_parse_game_collection_valid_yaml_returns_json() {
+        let yaml = crate::history::GameCollection::new().to_yaml().unwrap();
+        let result = parse_game_collection(&yaml);
+        assert!(!is_error_json(&result), "valid yaml should parse: {result}");
+        assert!(!result.is_empty(), "result must not be empty");
     }
 }

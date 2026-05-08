@@ -1172,6 +1172,14 @@ mod tests {
     fn test_handle_draw_sets_matched_false_when_rank_differs() {
         use cardpack::prelude::FrenchBasicCard;
         let mut game = two_player_game();
+        // Clear random initial hands and set known state so that:
+        //   - drawing KING_SPADES cannot complete a book (no Kings in hand), and
+        //   - both players share an Ace rank (prevents a deadlock-triggered GameOver
+        //     when the pile becomes empty after the draw).
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        game.players[0].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::ACE_HEARTS);
         game.phase = GamePhase::WaitingForDraw;
         game.last_asked_rank = Some(FrenchBasicCard::ACE_CLUBS.rank);
         game.draw_pile = BasicPile::from(vec![FrenchBasicCard::KING_SPADES]);
