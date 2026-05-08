@@ -103,6 +103,8 @@ jobs:
         with:
           node-version: lts/*
       - name: Get wasm-bindgen version from Cargo.lock
-        run: echo "WB_VERSION=$(awk '/^name = \"wasm-bindgen\"$/{found=1} found && /^version /{gsub(/"/, "", $3); print $3; exit}' Cargo.lock)" >> "$GITHUB_ENV"
+        run: |
+          WB_VERSION=$(grep -A1 '^name = "wasm-bindgen"$' Cargo.lock | grep '^version' | head -1 | cut -d'"' -f2)
+          echo "WB_VERSION=$WB_VERSION" >> "$GITHUB_ENV"
       - run: cargo install wasm-bindgen-cli --version "$WB_VERSION" --locked
       - run: cargo test --target wasm32-unknown-unknown --test wasm --features wasm
