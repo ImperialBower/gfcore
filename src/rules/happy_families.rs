@@ -377,7 +377,10 @@ mod tests {
 
     #[test]
     fn test_fluent_deck_key_is_non_empty() {
-        assert!(!HappyFamilies::fluent_deck_key().is_empty());
+        assert_eq!(
+            HappyFamilies::fluent_deck_key(),
+            cardpack::prelude::FLUENT_KEY_BASE_NAME_FRENCH
+        );
     }
 
     #[test]

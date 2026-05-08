@@ -487,7 +487,10 @@ mod tests {
 
     #[test]
     fn test_parse_variant_standard() {
-        assert!(matches!(parse_variant("Standard"), Ok(GameVariant::Standard)));
+        assert!(matches!(
+            parse_variant("Standard"),
+            Ok(GameVariant::Standard)
+        ));
     }
 
     #[test]
@@ -557,7 +560,10 @@ mod tests {
         reset_state();
         let limit = BotProfile::default_profiles().len();
         let result = new_bot_game("Standard", limit, 0.0);
-        assert!(!is_error_json(&result), "bot_count at limit should succeed: {result}");
+        assert!(
+            !is_error_json(&result),
+            "bot_count at limit should succeed: {result}"
+        );
     }
 
     #[test]
@@ -565,7 +571,10 @@ mod tests {
         // bot_count > limit must error; catches the == mutation on the > guard.
         let limit = BotProfile::default_profiles().len();
         let result = new_bot_game("Standard", limit + 1, 0.0);
-        assert!(is_error_json(&result), "bot_count over limit should error: {result}");
+        assert!(
+            is_error_json(&result),
+            "bot_count over limit should error: {result}"
+        );
     }
 
     // --- new_human_vs_bots_game ---
@@ -601,7 +610,10 @@ mod tests {
         reset_state();
         let limit = BotProfile::default_profiles().len();
         let result = new_human_vs_bots_game("Standard", "Alice", limit, 0.0);
-        assert!(!is_error_json(&result), "bot_count at limit should succeed: {result}");
+        assert!(
+            !is_error_json(&result),
+            "bot_count at limit should succeed: {result}"
+        );
     }
 
     #[test]
@@ -609,7 +621,10 @@ mod tests {
         // bot_count > limit must error; catches the == mutation on the > guard.
         let limit = BotProfile::default_profiles().len();
         let result = new_human_vs_bots_game("Standard", "Alice", limit + 1, 0.0);
-        assert!(is_error_json(&result), "bot_count over limit should error: {result}");
+        assert!(
+            is_error_json(&result),
+            "bot_count over limit should error: {result}"
+        );
     }
 
     // --- act ---
@@ -630,10 +645,13 @@ mod tests {
     #[test]
     fn test_act_wrong_phase_returns_error() {
         reset_state();
-        new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
+        let _ = new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
         // Game starts in WaitingForAsk; Draw is invalid in this phase.
         let result = act("\"Draw\"");
-        assert!(is_error_json(&result), "Draw in WaitingForAsk should error: {result}");
+        assert!(
+            is_error_json(&result),
+            "Draw in WaitingForAsk should error: {result}"
+        );
     }
 
     // --- get_state ---
@@ -648,7 +666,7 @@ mod tests {
     #[test]
     fn test_get_state_after_new_game_returns_state_json() {
         reset_state();
-        new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
+        let _ = new_game("Standard", r#"["Alice","Bob"]"#, 0.0);
         let result = get_state();
         assert!(!is_error_json(&result), "unexpected error: {result}");
         let v = parse(&result);
@@ -667,17 +685,20 @@ mod tests {
     #[test]
     fn test_step_bot_human_player_returns_done() {
         reset_state();
-        new_human_vs_bots_game("Standard", "Alice", 2, 0.0);
+        let _ = new_human_vs_bots_game("Standard", "Alice", 2, 0.0);
         // Player 0 is human — no bot profile, so step_bot must return done:true.
         let result = step_bot();
         let v = parse(&result);
-        assert_eq!(v["done"], true, "human turn must return done:true: {result}");
+        assert_eq!(
+            v["done"], true,
+            "human turn must return done:true: {result}"
+        );
     }
 
     #[test]
     fn test_step_bot_bot_game_returns_valid_response() {
         reset_state();
-        new_bot_game("Standard", 2, 0.0);
+        let _ = new_bot_game("Standard", 2, 0.0);
         let result = step_bot();
         assert!(!is_error_json(&result), "step_bot must not error: {result}");
         let v = parse(&result);
@@ -692,7 +713,7 @@ mod tests {
     #[test]
     fn test_step_bot_draws_when_in_waiting_for_draw_phase() {
         reset_state();
-        new_bot_game("Standard", 2, 0.0);
+        let _ = new_bot_game("Standard", 2, 0.0);
         for _ in 0..500 {
             let state = parse(&get_state());
             match state["phase"].as_str().unwrap_or("") {
@@ -708,7 +729,7 @@ mod tests {
                     return;
                 }
                 _ => {
-                    step_bot();
+                    let _ = step_bot();
                 }
             }
         }
@@ -728,9 +749,12 @@ mod tests {
     #[test]
     fn test_get_game_yaml_with_active_game_returns_yaml() {
         reset_state();
-        new_bot_game("Standard", 2, 0.0);
+        let _ = new_bot_game("Standard", 2, 0.0);
         let result = get_game_yaml();
-        assert!(!is_error_json(&result), "get_game_yaml must not error: {result}");
+        assert!(
+            !is_error_json(&result),
+            "get_game_yaml must not error: {result}"
+        );
         assert!(!result.is_empty(), "yaml must not be empty");
     }
 
