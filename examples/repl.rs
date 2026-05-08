@@ -13,7 +13,7 @@
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 
-use cardpack::prelude::{BasicPile, Pip};
+use cardpack::prelude::{BasicCard, BasicPile, Pip};
 use gfcore::bot::BotProfile;
 use gfcore::prelude::{Game, GameEvent, GamePhase, GameState, GameVariant, Player, PlayerAction};
 
@@ -109,12 +109,7 @@ fn human_turn(
     let hand = state.players[0].hand.as_ref().expect("human hand visible");
     let groups = rank_groups(hand);
 
-    let hand_str = groups
-        .iter()
-        .map(|(ch, n)| format!("{ch}({n})"))
-        .collect::<Vec<_>>()
-        .join("  ");
-    println!("\n  Your hand:  {hand_str}");
+    println!("\n  Your hand:  {}", format_hand(hand));
 
     if state.phase == GamePhase::WaitingForDraw {
         println!("  Go Fish!  Press Enter to draw.");
@@ -231,6 +226,32 @@ fn print_event(event: &GameEvent, names: &[String]) {
 // ---------------------------------------------------------------------------
 // Input helpers
 // ---------------------------------------------------------------------------
+
+/// Formats a hand as individual cards grouped by rank, e.g. `K♠ K♦  6♠ 6♦ 6♣  2♥`.
+/// Rank groups are separated by two spaces, suits within each group by one space.
+/// Ranks are sorted high-to-low; suits within a rank are sorted high-to-low.
+fn format_hand(hand: &BasicPile) -> String {
+    let mut by_rank: HashMap<usize, Vec<BasicCard>> = HashMap::new();
+    for card in hand {
+        by_rank.entry(card.rank.weight).or_default().push(*card);
+    }
+    let mut groups: Vec<(usize, Vec<BasicCard>)> = by_rank.into_iter().collect();
+    groups.sort_by_key(|(w, _)| std::cmp::Reverse(*w));
+    for (_, cards) in &mut groups {
+        cards.sort_by_key(|c| std::cmp::Reverse(c.suit.weight));
+    }
+    groups
+        .into_iter()
+        .map(|(_, cards)| {
+            cards
+                .into_iter()
+                .map(|c| c.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
+        .collect::<Vec<_>>()
+        .join("  ")
+}
 
 /// Returns cards in the hand grouped by rank, sorted by weight descending
 /// (high ranks first: A, K, Q, J, T, 9, …).
