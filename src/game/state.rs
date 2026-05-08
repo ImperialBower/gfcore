@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::GfError;
 use crate::game::action::PlayerAction;
 use crate::player::{AskEntry, Player, PlayerView};
-use crate::rules::GameVariant;
+use crate::rules::{GameVariant, GoFishRules};
 
 #[cfg(feature = "history")]
 use crate::history::{GameRecord, TurnRecord};
@@ -273,9 +273,8 @@ impl Game {
         }
 
         // Check for immediate books in initial hands.
-        let book_size = rules.book_size();
         for player in &mut players {
-            Self::collect_books_for_player(player, book_size);
+            Self::collect_books_for_player(player, rules);
         }
 
         // Build the initial GameRecord before variant/players are moved.
@@ -498,8 +497,12 @@ impl Game {
             return Err(GfError::InvalidTarget);
         }
 
-        // The asker must hold the requested rank.
-        if !self.players[cp].has_rank(&rank) {
+        // The asker must satisfy the variant's ask rule.
+        if !self
+            .variant
+            .rules()
+            .is_valid_ask(self.players[cp].hand(), &rank)
+        {
             return Err(GfError::InvalidAsk);
         }
 
@@ -550,8 +553,8 @@ impl Game {
         self.push_event(&gave_event);
 
         // Check for a completed book.
-        let book_size = self.variant.rules().book_size();
-        let last_event = if self.check_and_collect_book(cp, &rank, book_size) {
+        let rules = self.variant.rules();
+        let last_event = if Self::check_and_collect_book(&mut self.players, cp, &rank, rules) {
             let book_event = GameEvent::Book {
                 player: cp,
                 rank: rank.index.to_string(),
@@ -646,12 +649,11 @@ impl Game {
         #[cfg(feature = "history")]
         self.push_event(&drew_event);
 
-        let book_size = self.variant.rules().book_size();
-
         let last_event = if matched {
             // Check whether the drawn card completes a book.
             if let Some(ref r) = asked_rank {
-                if self.check_and_collect_book(cp, r, book_size) {
+                let rules = self.variant.rules();
+                if Self::check_and_collect_book(&mut self.players, cp, r, rules) {
                     let book_event = GameEvent::Book {
                         player: cp,
                         rank: r.index.to_string(),
@@ -703,7 +705,6 @@ impl Game {
         if player_index >= self.players.len() {
             return false;
         }
-        let book_size = self.variant.rules().book_size();
         // Draw cards until the player holds at least one or pile is exhausted.
         // Bound the loop to the pile size to prevent any infinite loop.
         let max_draws = self.draw_pile.len() + 1;
@@ -718,7 +719,8 @@ impl Game {
                 let r = card.rank;
                 self.players[player_index].receive_card(card);
                 // If the drawn card completes a book, it is removed from the hand.
-                self.check_and_collect_book(player_index, &r, book_size);
+                let rules = self.variant.rules();
+                Self::check_and_collect_book(&mut self.players, player_index, &r, rules);
             }
         }
         !self.players[player_index].hand_is_empty()
@@ -834,28 +836,38 @@ impl Game {
     // Private helpers — book collection
     // -----------------------------------------------------------------------
 
-    /// Checks whether `player` now has `book_size` cards of `rank` and, if so,
-    /// removes them from the hand and records a book.  Returns `true` if a book
-    /// was collected.
-    fn check_and_collect_book(&mut self, player: usize, rank: &Pip, book_size: usize) -> bool {
-        if player >= self.players.len() {
+    /// Checks whether `player` now holds a complete book of `rank` according to
+    /// the variant's `is_book` rule and, if so, removes the cards from the hand
+    /// and records a book.  Returns `true` if a book was collected.
+    ///
+    /// Takes `players` as an explicit slice rather than `&mut self` so that
+    /// callers can hold a shared borrow of `self.variant` (for `rules`) at the
+    /// same time as a mutable borrow of `self.players` — the two fields do not
+    /// alias.
+    fn check_and_collect_book(
+        players: &mut [Player],
+        player: usize,
+        rank: &Pip,
+        rules: &dyn GoFishRules,
+    ) -> bool {
+        if player >= players.len() {
             return false;
         }
-        let cards_of_rank = self.players[player].cards_of_rank(rank);
-        if cards_of_rank.len() >= book_size {
-            let book = self.players[player].give_cards_of_rank(rank);
-            self.players[player].add_book(book);
+        let cards_of_rank = players[player].cards_of_rank(rank);
+        if rules.is_book(&cards_of_rank) {
+            let book = players[player].give_cards_of_rank(rank);
+            players[player].add_book(book);
             return true;
         }
         false
     }
 
     /// Drains all completed books from `player`'s hand on game start.
-    fn collect_books_for_player(player: &mut Player, book_size: usize) {
+    fn collect_books_for_player(player: &mut Player, rules: &dyn GoFishRules) {
         let ranks: Vec<Pip> = player.held_ranks();
         for rank in ranks {
-            let count = player.cards_of_rank(&rank).len();
-            if count >= book_size {
+            let cards = player.cards_of_rank(&rank);
+            if rules.is_book(&cards) {
                 let book = player.give_cards_of_rank(&rank);
                 player.add_book(book);
             }
@@ -1312,6 +1324,7 @@ mod tests {
 
     #[test]
     fn test_collect_books_for_player_removes_complete_books() {
+        use crate::rules::StandardRules;
         use cardpack::prelude::FrenchBasicCard;
         let mut player = Player::new("Alice");
         player.receive_card(FrenchBasicCard::ACE_SPADES);
@@ -1319,19 +1332,20 @@ mod tests {
         player.receive_card(FrenchBasicCard::ACE_DIAMONDS);
         player.receive_card(FrenchBasicCard::ACE_CLUBS);
         player.receive_card(FrenchBasicCard::KING_SPADES);
-        Game::collect_books_for_player(&mut player, 4);
+        Game::collect_books_for_player(&mut player, &StandardRules);
         assert_eq!(player.book_count(), 1);
         assert_eq!(player.hand_size(), 1);
     }
 
     #[test]
     fn test_collect_books_for_player_no_op_for_mixed_hand() {
+        use crate::rules::StandardRules;
         use cardpack::prelude::FrenchBasicCard;
         let mut player = Player::new("Bob");
         player.receive_card(FrenchBasicCard::ACE_SPADES);
         player.receive_card(FrenchBasicCard::KING_SPADES);
         player.receive_card(FrenchBasicCard::QUEEN_SPADES);
-        Game::collect_books_for_player(&mut player, 4);
+        Game::collect_books_for_player(&mut player, &StandardRules);
         assert_eq!(player.book_count(), 0);
         assert_eq!(player.hand_size(), 3);
     }
@@ -1505,6 +1519,156 @@ mod tests {
             game.history.turns.len(),
             turns_before,
             "no synthetic GameOver-only turn should be added when pending events were empty"
+        );
+    }
+
+    #[test]
+    fn test_custom_is_valid_ask_honored_by_engine() {
+        // Custom rule: every ask is valid regardless of hand contents.
+        // Without the fix, the engine short-circuits with GfError::InvalidAsk
+        // before consulting is_valid_ask. After the fix it must succeed.
+        use crate::game::action::PlayerAction;
+        use crate::player::Player;
+        use crate::rules::{GameVariant, GoFishRules};
+        use cardpack::prelude::{BasicPile, FrenchBasicCard, Pip};
+
+        struct AnyAskValid;
+        impl GoFishRules for AnyAskValid {
+            fn name(&self) -> &'static str {
+                "AnyAskValid"
+            }
+            fn deck(&self) -> BasicPile {
+                // Returns a fixed, unshuffled pile. Game::new deals round-robin from index 0,
+                // so the hand layout in comments above is deterministic.
+                // Round-robin deal (hand_size=2):
+                //   A: [ACE_SPADES, ACE_HEARTS]
+                //   B: [KING_SPADES, KING_HEARTS]
+                //   draw: [QUEEN_SPADES, QUEEN_HEARTS]
+                BasicPile::from(vec![
+                    FrenchBasicCard::ACE_SPADES,
+                    FrenchBasicCard::KING_SPADES,
+                    FrenchBasicCard::ACE_HEARTS,
+                    FrenchBasicCard::KING_HEARTS,
+                    FrenchBasicCard::QUEEN_SPADES,
+                    FrenchBasicCard::QUEEN_HEARTS,
+                ])
+            }
+            fn book_size(&self) -> usize {
+                4
+            }
+            fn initial_hand_size(&self, _: usize) -> usize {
+                2
+            }
+            fn min_players(&self) -> usize {
+                2
+            }
+            fn max_players(&self) -> usize {
+                4
+            }
+            fn is_valid_ask(&self, _hand: &BasicPile, _rank: &Pip) -> bool {
+                true
+            }
+            fn is_book(&self, cards: &BasicPile) -> bool {
+                if cards.len() != 4 {
+                    return false;
+                }
+                let first = match cards.v().first() {
+                    Some(c) => c.rank,
+                    None => return false,
+                };
+                cards.v().iter().all(|c| c.rank == first)
+            }
+        }
+
+        let players = vec![Player::new("A"), Player::new("B")];
+        let mut game = Game::new(GameVariant::Custom(Box::new(AnyAskValid)), players).unwrap();
+
+        // A holds [ACE_SPADES, ACE_HEARTS] — does NOT hold King rank.
+        let king_rank = FrenchBasicCard::KING_SPADES.rank;
+        let result = game.act(PlayerAction::Ask {
+            target: 1,
+            rank: king_rank,
+        });
+        assert!(
+            result.is_ok(),
+            "custom is_valid_ask (always true) must permit asking for unheld rank, got: {result:?}"
+        );
+    }
+
+    #[test]
+    fn test_custom_is_book_honored_by_engine() {
+        // Custom rule: a pair of the same rank is a book.
+        // Without the fix, engine counts cards.len() >= 4, so a pair is never
+        // collected as a book. After the fix it must emit GameEvent::Book.
+        use crate::game::action::PlayerAction;
+        use crate::player::Player;
+        use crate::rules::{GameVariant, GoFishRules};
+        use cardpack::prelude::{BasicPile, FrenchBasicCard, Pip};
+
+        struct PairIsBook;
+        impl GoFishRules for PairIsBook {
+            fn name(&self) -> &'static str {
+                "PairIsBook"
+            }
+            fn deck(&self) -> BasicPile {
+                // Round-robin deal (hand_size=2):
+                //   iter1: A gets ACE_SPADES, B gets ACE_HEARTS
+                //   iter2: A gets KING_SPADES, B gets KING_HEARTS
+                //   draw: [QUEEN_SPADES, QUEEN_HEARTS]
+                // A: [ACE_SPADES, KING_SPADES], B: [ACE_HEARTS, KING_HEARTS]
+                // No startup books: each player has 1 ace + 1 king, is_book([1 card]) = false.
+                BasicPile::from(vec![
+                    FrenchBasicCard::ACE_SPADES,
+                    FrenchBasicCard::ACE_HEARTS,
+                    FrenchBasicCard::KING_SPADES,
+                    FrenchBasicCard::KING_HEARTS,
+                    FrenchBasicCard::QUEEN_SPADES,
+                    FrenchBasicCard::QUEEN_HEARTS,
+                ])
+            }
+            fn book_size(&self) -> usize {
+                2
+            }
+            fn initial_hand_size(&self, _: usize) -> usize {
+                2
+            }
+            fn min_players(&self) -> usize {
+                2
+            }
+            fn max_players(&self) -> usize {
+                4
+            }
+            fn is_valid_ask(&self, hand: &BasicPile, rank: &Pip) -> bool {
+                hand.iter().any(|c| &c.rank == rank)
+            }
+            fn is_book(&self, cards: &BasicPile) -> bool {
+                if cards.len() != 2 {
+                    return false;
+                }
+                match (cards.v().first(), cards.v().get(1)) {
+                    (Some(a), Some(b)) => a.rank == b.rank,
+                    _ => false,
+                }
+            }
+        }
+
+        let players = vec![Player::new("A"), Player::new("B")];
+        let mut game = Game::new(GameVariant::Custom(Box::new(PairIsBook)), players).unwrap();
+
+        // A: [ACE_SPADES, KING_SPADES], B: [ACE_HEARTS, KING_HEARTS]
+        // A asks B for ACE. B gives ACE_HEARTS. A now has [ACE_SPADES, ACE_HEARTS, KING_SPADES].
+        // check_and_collect_book: cards_of_rank(ace) = [ACE_SPADES, ACE_HEARTS]
+        // is_book([2 aces]) = true → Book collected.
+        let ace_rank = FrenchBasicCard::ACE_SPADES.rank;
+        let event = game
+            .act(PlayerAction::Ask {
+                target: 1,
+                rank: ace_rank,
+            })
+            .unwrap();
+        assert!(
+            matches!(event, GameEvent::Book { .. }),
+            "custom is_book (pair=book) must collect a 2-card book, got: {event:?}"
         );
     }
 }

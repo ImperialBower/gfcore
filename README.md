@@ -10,6 +10,62 @@
 
 Go Fish card game engine for the ImperialBower project ecosystem.
 
+## Usage
+
+Add `gfcore` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+gfcore = "0.0.1"
+```
+
+Quick start — create a game, take a turn, inspect state:
+
+```rust
+use gfcore::prelude::*;
+
+let players = vec![
+    Player::new("Alice"),
+    Player::new("Bob"),
+];
+let mut game = Game::new(GameVariant::Standard, players)?;
+
+// Ask player 1 for Aces
+let event = game.act(PlayerAction::Ask { target: 1, rank: /* Ace pip */ })?;
+```
+
+See `cargo doc --open` for the full API reference.
+
+### Interactive REPL
+
+Play a quick game against three bots in your terminal:
+
+```sh
+cargo run --example repl
+```
+
+```
+=== Go Fish ===
+You vs Harriet (smart), Bertram (smart), Lucky (random)
+
+
+  Draw pile: 24 cards
+  > You          7 cards   0 books
+    Harriet      7 cards   0 books
+    Bertram      7 cards   0 books
+    Lucky        7 cards   0 books
+
+  Your hand:  K♦  Q♠  J♥  T♣  8♥ 8♦  6♠
+  Who do you want to ask?
+    [1] Harriet     7 cards  0 books
+    [2] Bertram     7 cards  0 books
+    [3] Lucky       7 cards  0 books
+  Target: 1
+  Rank? [K/Q/J/T/8/6]
+  Rank: 8
+  -> Harriet gives You 1 8.
+```
+
 ## Backstory
 
 This is an experiment in using AI code generation to create a very simple mirror to my 

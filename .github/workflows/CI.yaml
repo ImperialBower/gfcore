@@ -87,3 +87,23 @@ jobs:
       - run: cargo miri test
         env:
           MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-disable-isolation
+
+  wasm:
+    name: Wasm
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+          components: rust-src
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version "$(cargo pkgid wasm-bindgen | cut -d'@' -f2)" --locked
+      - run: cargo test --target wasm32-unknown-unknown --test wasm --features wasm
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner

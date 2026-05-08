@@ -112,10 +112,12 @@ pub enum GfError {
     /// ```
     GameAlreadyOver,
 
-    /// A draw was attempted on an empty draw pile.
+    /// Reserved for callers or future engine versions that need to signal a
+    /// draw on an empty pile as a hard error.
     ///
-    /// Under normal game flow the draw pile should never be exhausted unexpectedly;
-    /// this variant acts as a defensive guard.
+    /// The current engine does not emit this variant; when the draw pile is
+    /// exhausted it advances the turn and emits [`crate::game::GameEvent::Drew`] with
+    /// `matched: false` instead of returning an error.
     ///
     /// # Examples
     ///
