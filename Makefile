@@ -160,7 +160,7 @@ endef
 # Run mutation tests
 mutants:
 	$(check_mutants)
-	cargo mutants
+	cargo mutants --all-features
 
 # Clean once, then run build + test
 build_test: clean build test
