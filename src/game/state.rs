@@ -401,6 +401,23 @@ impl Game {
         })
     }
 
+    /// Like [`state`] but always reveals `observer`'s hand regardless of whose
+    /// turn it is.  Used by the WASM layer so the human's hand stays visible
+    /// throughout bot turns.
+    pub fn state_as_observer(&self, observer: usize) -> Result<GameState, GfError> {
+        let players = PlayerView::from_perspective(&self.players, observer)?;
+
+        Ok(GameState {
+            phase: self.phase.clone(),
+            current_player: self.current_player,
+            players,
+            draw_pile_size: self.draw_pile.len(),
+            last_event: self.last_event.clone(),
+            winner: self.winner,
+            ask_log: self.ask_log.clone(),
+        })
+    }
+
     /// Returns the index of the player whose turn it is.
     ///
     /// # Examples

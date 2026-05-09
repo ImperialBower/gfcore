@@ -301,6 +301,26 @@ pub fn get_state() -> String {
     })
 }
 
+/// Like [`get_state`] but always returns state from player 0's perspective so
+/// the human hand remains visible during bot turns.
+#[must_use]
+#[wasm_bindgen]
+pub fn get_human_state() -> String {
+    GAME.with(|cell| {
+        let borrow = cell.borrow();
+        match borrow.as_ref() {
+            None => error_json("no game in progress"),
+            Some(game) => match game.state_as_observer(0) {
+                Ok(s) => match serde_json::to_string(&s) {
+                    Ok(j) => j,
+                    Err(e) => error_json(&e.to_string()),
+                },
+                Err(e) => error_json(&e.to_string()),
+            },
+        }
+    })
+}
+
 /// If the current player is a bot, computes and applies their action.
 ///
 /// Returns:
@@ -359,6 +379,12 @@ pub fn step_bot() -> String {
         profile.decide(&hand, &state.players, &state.ask_log)
     };
 
+    // Serialize the action before it is consumed by game.act().
+    let action_json = match serde_json::to_string(&action) {
+        Ok(j) => j,
+        Err(e) => return error_json(&e.to_string()),
+    };
+
     // Apply the action.
     let event_json = GAME.with(|cell| {
         let mut borrow = cell.borrow_mut();
@@ -383,7 +409,7 @@ pub fn step_bot() -> String {
         return event_json;
     }
 
-    format!("{{\"done\":false,\"event\":{event_json}}}")
+    format!("{{\"done\":false,\"player\":{current_player},\"action\":{action_json},\"event\":{event_json}}}")
 }
 
 /// Returns the full game history as YAML.
