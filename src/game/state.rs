@@ -401,9 +401,13 @@ impl Game {
         })
     }
 
-    /// Like [`state`] but always reveals `observer`'s hand regardless of whose
+    /// Like [`Self::state`] but always reveals `observer`'s hand regardless of whose
     /// turn it is.  Used by the WASM layer so the human's hand stays visible
     /// throughout bot turns.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`GfError::InvalidTarget`] if `observer` is out of range for the current player list.
     pub fn state_as_observer(&self, observer: usize) -> Result<GameState, GfError> {
         let players = PlayerView::from_perspective(&self.players, observer)?;
 

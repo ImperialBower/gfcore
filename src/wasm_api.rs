@@ -409,7 +409,9 @@ pub fn step_bot() -> String {
         return event_json;
     }
 
-    format!("{{\"done\":false,\"player\":{current_player},\"action\":{action_json},\"event\":{event_json}}}")
+    format!(
+        "{{\"done\":false,\"player\":{current_player},\"action\":{action_json},\"event\":{event_json}}}"
+    )
 }
 
 /// Returns the full game history as YAML.
