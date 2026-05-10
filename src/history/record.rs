@@ -4,13 +4,25 @@
 //! call [`GameRecord::to_yaml`] or [`GameRecord::to_json`] to persist it.
 //! Load it back with [`GameRecord::from_yaml`] or [`GameRecord::from_json`].
 
+use cardpack::prelude::BasicPile;
 use serde::{Deserialize, Serialize};
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use crate::error::GfError;
-use crate::game::GameEvent;
+use crate::game::{GameEvent, PlayerAction};
+
+/// The serialization format version written into every new [`GameCollection`].
+pub const FORMAT_VERSION: u32 = 1;
+
+fn default_gfcore_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
+fn default_format_version() -> u32 {
+    FORMAT_VERSION
+}
 
 // ---------------------------------------------------------------------------
 // TurnRecord
@@ -28,9 +40,11 @@ use crate::game::GameEvent;
 ///     player: 0,
 ///     events: vec![],
 ///     books_after_turn: vec![0, 0],
+///     actions: None,
 /// };
 /// assert_eq!(turn.player, 0);
 /// assert!(turn.events.is_empty());
+/// assert!(turn.actions.is_none());
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TurnRecord {
@@ -41,6 +55,13 @@ pub struct TurnRecord {
     /// Book counts per player after this turn completes.
     /// Index matches the player index.
     pub books_after_turn: Vec<usize>,
+    /// Actions submitted by the player during this turn, in order.
+    ///
+    /// `None` if this record was created without action recording (e.g., WASM
+    /// games or records pre-dating this feature). `Some(...)` enables
+    /// [`GameRecord::replay`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actions: Option<Vec<PlayerAction>>,
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +103,10 @@ pub struct GameRecord {
     pub turns: Vec<TurnRecord>,
     /// Index of the winning player once the game is over, or `None` for a tie.
     pub winner: Option<usize>,
+    /// The full draw pile before the initial deal, enabling deterministic replay.
+    /// `None` for records created without the replay path (e.g. WASM, old unit tests).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_draw_pile: Option<BasicPile>,
 }
 
 impl GameRecord {
@@ -115,6 +140,7 @@ impl GameRecord {
             players,
             turns: Vec::new(),
             winner: None,
+            initial_draw_pile: None,
         }
     }
 
@@ -205,37 +231,54 @@ impl GameRecord {
 // GameCollection
 // ---------------------------------------------------------------------------
 
-/// An ordered collection of [`GameRecord`]s.
+/// An ordered, versioned collection of [`GameRecord`]s.
 ///
-/// Serializes as a YAML/JSON sequence of records, not a wrapped object.
+/// Serializes as a YAML/JSON object with `gfcore_version`, `format_version`,
+/// and `games` keys.
 ///
 /// # Examples
 ///
 /// ```
-/// use gfcore::history::{GameCollection, GameRecord};
+/// use gfcore::history::{GameCollection, GameRecord, FORMAT_VERSION};
 ///
 /// let mut col = GameCollection::new();
 /// assert!(col.is_empty());
+/// assert_eq!(col.format_version, FORMAT_VERSION);
 /// col.push(GameRecord::new("Standard", vec!["Alice".to_string()]));
 /// assert_eq!(col.len(), 1);
 /// ```
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-pub struct GameCollection(Vec<GameRecord>);
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GameCollection {
+    /// The `gfcore` crate version that created this collection (baked in at compile time).
+    #[serde(default = "default_gfcore_version")]
+    pub gfcore_version: String,
+    /// The serialization format version. Always [`FORMAT_VERSION`] for newly created collections.
+    #[serde(default = "default_format_version")]
+    pub format_version: u32,
+    /// The game records in this collection, in insertion order.
+    pub games: Vec<GameRecord>,
+}
 
 impl GameCollection {
-    /// Creates an empty [`GameCollection`].
+    /// Creates an empty [`GameCollection`] with the current crate version and
+    /// [`FORMAT_VERSION`] set.
     ///
     /// # Examples
     ///
     /// ```
-    /// use gfcore::history::GameCollection;
+    /// use gfcore::history::{GameCollection, FORMAT_VERSION};
     ///
     /// let col = GameCollection::new();
     /// assert!(col.is_empty());
+    /// assert_eq!(col.format_version, FORMAT_VERSION);
     /// ```
     #[must_use]
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self {
+            gfcore_version: env!("CARGO_PKG_VERSION").to_string(),
+            format_version: FORMAT_VERSION,
+            games: Vec::new(),
+        }
     }
 
     /// Appends a [`GameRecord`] to the collection.
@@ -250,7 +293,7 @@ impl GameCollection {
     /// assert_eq!(col.len(), 1);
     /// ```
     pub fn push(&mut self, record: GameRecord) {
-        self.0.push(record);
+        self.games.push(record);
     }
 
     /// Returns the number of records in the collection.
@@ -265,7 +308,7 @@ impl GameCollection {
     /// ```
     #[must_use]
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.games.len()
     }
 
     /// Returns `true` if the collection contains no records.
@@ -280,7 +323,7 @@ impl GameCollection {
     /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
+        self.games.is_empty()
     }
 
     /// Returns an iterator over the records in this collection.
@@ -295,7 +338,7 @@ impl GameCollection {
     /// assert_eq!(col.iter().count(), 1);
     /// ```
     pub fn iter(&self) -> impl Iterator<Item = &GameRecord> {
-        self.0.iter()
+        self.games.iter()
     }
 
     /// Serializes this collection to a YAML string.
@@ -381,13 +424,79 @@ impl GameCollection {
     pub fn from_json(s: &str) -> Result<Self, GfError> {
         serde_json::from_str(s).map_err(GfError::from)
     }
+
+    /// Writes this collection to `generated/<run_name>_<unix_ts>.yaml`.
+    ///
+    /// The `generated/` directory is relative to the process's current working
+    /// directory and is created automatically if it does not already exist.
+    /// Returns the path written on success.
+    ///
+    /// # Errors
+    ///
+    /// - [`GfError::IoError`] — directory creation or file write failed.
+    /// - [`GfError::ParseError`] — YAML serialization failed.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use gfcore::history::GameCollection;
+    ///
+    /// let col = GameCollection::new();
+    /// let path = col.save("my_session").expect("save must succeed");
+    /// assert!(path.contains("my_session"));
+    /// ```
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn save(&self, run_name: &str) -> Result<String, GfError> {
+        let ts = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let path = format!("generated/{run_name}_{ts}.yaml");
+        self.save_to(&path)
+    }
+
+    /// Writes this collection to `path`, creating parent directories as needed.
+    ///
+    /// Returns `path` as a `String` on success.
+    ///
+    /// # Errors
+    ///
+    /// - [`GfError::IoError`] — directory creation or file write failed.
+    /// - [`GfError::ParseError`] — YAML serialization failed.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use gfcore::history::GameCollection;
+    ///
+    /// let col = GameCollection::new();
+    /// let path = col.save_to("/tmp/test_collection.yaml").expect("save must succeed");
+    /// assert_eq!(path, "/tmp/test_collection.yaml");
+    /// ```
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn save_to(&self, path: &str) -> Result<String, GfError> {
+        let yaml = self.to_yaml()?;
+        if let Some(parent) = std::path::Path::new(path).parent() {
+            if !parent.as_os_str().is_empty() {
+                std::fs::create_dir_all(parent).map_err(|e| GfError::IoError(e.to_string()))?;
+            }
+        }
+        std::fs::write(path, &yaml).map_err(|e| GfError::IoError(e.to_string()))?;
+        Ok(path.to_string())
+    }
+}
+
+impl Default for GameCollection {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl std::ops::Index<usize> for GameCollection {
     type Output = GameRecord;
 
     fn index(&self, idx: usize) -> &Self::Output {
-        &self.0[idx]
+        &self.games[idx]
     }
 }
 
@@ -462,6 +571,7 @@ mod tests {
                 },
             ],
             books_after_turn: vec![0, 0],
+            actions: None,
         };
         r.turns.push(turn);
         r.winner = Some(0);
@@ -529,5 +639,86 @@ mod tests {
         let yaml = col.to_yaml().unwrap();
         let back = GameCollection::from_yaml(&yaml).unwrap();
         assert_eq!(col, back);
+    }
+
+    #[test]
+    fn test_turn_record_actions_default_is_none() {
+        let turn = TurnRecord {
+            player: 0,
+            events: vec![],
+            books_after_turn: vec![0, 0],
+            actions: None,
+        };
+        assert!(turn.actions.is_none());
+    }
+
+    #[test]
+    fn test_turn_record_with_actions_yaml_round_trip() {
+        use crate::game::PlayerAction;
+        use cardpack::prelude::{DeckedBase, Standard52};
+        let rank = Standard52::basic_pile().v()[0].rank;
+        let turn = TurnRecord {
+            player: 0,
+            events: vec![],
+            books_after_turn: vec![0, 0],
+            actions: Some(vec![
+                PlayerAction::Ask { target: 1, rank },
+                PlayerAction::Draw,
+            ]),
+        };
+        let yaml = serde_norway::to_string(&turn).unwrap();
+        let back: TurnRecord = serde_norway::from_str(&yaml).unwrap();
+        assert_eq!(turn, back);
+    }
+
+    #[test]
+    fn test_turn_record_none_actions_omitted_from_yaml() {
+        let turn = TurnRecord {
+            player: 0,
+            events: vec![],
+            books_after_turn: vec![0, 0],
+            actions: None,
+        };
+        let yaml = serde_norway::to_string(&turn).unwrap();
+        assert!(!yaml.contains("actions"));
+    }
+
+    #[test]
+    fn test_game_collection_has_format_version() {
+        let col = GameCollection::new();
+        assert_eq!(col.format_version, FORMAT_VERSION);
+    }
+
+    #[test]
+    fn test_game_collection_has_gfcore_version() {
+        let col = GameCollection::new();
+        assert!(!col.gfcore_version.is_empty());
+    }
+
+    #[test]
+    fn test_game_collection_yaml_contains_version_fields() {
+        let col = GameCollection::new();
+        let yaml = col.to_yaml().unwrap();
+        assert!(yaml.contains("format_version"));
+        assert!(yaml.contains("gfcore_version"));
+        assert!(yaml.contains("games"));
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn test_game_collection_save_to_temp_dir() {
+        let mut col = GameCollection::new();
+        col.push(make_record());
+        let path = std::env::temp_dir()
+            .join("gfcore_test_save_to.yaml")
+            .to_string_lossy()
+            .to_string();
+        let result = col.save_to(&path);
+        assert!(result.is_ok(), "save_to failed: {:?}", result);
+        assert!(std::path::Path::new(&path).exists());
+        let yaml = std::fs::read_to_string(&path).unwrap();
+        let loaded = GameCollection::from_yaml(&yaml).unwrap();
+        assert_eq!(col, loaded);
+        let _ = std::fs::remove_file(&path);
     }
 }

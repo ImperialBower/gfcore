@@ -219,6 +219,9 @@ pub struct Game {
     /// Events accumulated for the current turn, flushed when the turn ends.
     #[cfg(feature = "history")]
     pending_turn_events: Vec<GameEvent>,
+    /// Actions submitted during the current turn, flushed into [`TurnRecord::actions`].
+    #[cfg(feature = "history")]
+    pending_turn_actions: Vec<PlayerAction>,
     /// Completed turn records plus metadata; grows as turns are flushed.
     #[cfg(feature = "history")]
     history: GameRecord,
@@ -249,7 +252,28 @@ impl Game {
     /// let game = Game::new(GameVariant::Standard, players);
     /// assert!(game.is_ok());
     /// ```
-    pub fn new(variant: GameVariant, mut players: Vec<Player>) -> Result<Self, GfError> {
+    pub fn new(variant: GameVariant, players: Vec<Player>) -> Result<Self, GfError> {
+        let draw_pile = variant.rules().deck();
+        Self::setup(variant, players, draw_pile)
+    }
+
+    /// Creates a game using the provided pre-built draw pile instead of dealing from a
+    /// freshly shuffled deck.  Used by [`crate::history::replay`] to reconstruct the
+    /// exact initial state recorded in a [`crate::history::GameRecord`].
+    #[cfg(feature = "history")]
+    pub(crate) fn new_with_deck(
+        variant: GameVariant,
+        players: Vec<Player>,
+        draw_pile: cardpack::prelude::BasicPile,
+    ) -> Result<Self, GfError> {
+        Self::setup(variant, players, draw_pile)
+    }
+
+    fn setup(
+        variant: GameVariant,
+        mut players: Vec<Player>,
+        mut draw_pile: cardpack::prelude::BasicPile,
+    ) -> Result<Self, GfError> {
         let rules = variant.rules();
         let player_count = players.len();
 
@@ -260,7 +284,15 @@ impl Game {
             return Err(GfError::TooManyPlayers);
         }
 
-        let mut draw_pile = rules.deck();
+        // Build the initial GameRecord before dealing (captures initial_draw_pile).
+        #[cfg(feature = "history")]
+        let history = {
+            let player_names: Vec<String> = players.iter().map(|p| p.name.clone()).collect();
+            let mut record = GameRecord::new(variant.rules().name(), player_names);
+            record.initial_draw_pile = Some(draw_pile.clone());
+            record
+        };
+
         let hand_size = rules.initial_hand_size(player_count);
 
         // Deal cards in round-robin order.
@@ -277,13 +309,6 @@ impl Game {
             Self::collect_books_for_player(player, rules);
         }
 
-        // Build the initial GameRecord before variant/players are moved.
-        #[cfg(feature = "history")]
-        let history = {
-            let player_names: Vec<String> = players.iter().map(|p| p.name.clone()).collect();
-            GameRecord::new(variant.rules().name(), player_names)
-        };
-
         let mut game = Self {
             variant,
             players,
@@ -298,6 +323,8 @@ impl Game {
             pending_turn_player: 0,
             #[cfg(feature = "history")]
             pending_turn_events: Vec::new(),
+            #[cfg(feature = "history")]
+            pending_turn_actions: Vec::new(),
             #[cfg(feature = "history")]
             history,
         };
@@ -496,6 +523,11 @@ impl Game {
                 player: self.pending_turn_player,
                 events: self.pending_turn_events.clone(),
                 books_after_turn: books,
+                actions: if self.pending_turn_actions.is_empty() {
+                    None
+                } else {
+                    Some(self.pending_turn_actions.clone())
+                },
             });
         }
         record
@@ -526,6 +558,11 @@ impl Game {
         {
             return Err(GfError::InvalidAsk);
         }
+
+        // Record the validated action for replay.
+        #[cfg(feature = "history")]
+        self.pending_turn_actions
+            .push(PlayerAction::Ask { target, rank });
 
         // Record the ask in the public log before branching on Go-Fish/give.
         self.ask_log.push(AskEntry {
@@ -612,6 +649,10 @@ impl Game {
         if self.phase != GamePhase::WaitingForDraw {
             return Err(GfError::OutOfTurn);
         }
+
+        // Record the validated action for replay.
+        #[cfg(feature = "history")]
+        self.pending_turn_actions.push(PlayerAction::Draw);
 
         // Save and clear last_asked_rank atomically so early-exit paths never
         // leave a stale value while the match check below still uses it.
@@ -850,6 +891,11 @@ impl Game {
             player: self.pending_turn_player,
             events: std::mem::take(&mut self.pending_turn_events),
             books_after_turn: books,
+            actions: if self.pending_turn_actions.is_empty() {
+                None
+            } else {
+                Some(std::mem::take(&mut self.pending_turn_actions))
+            },
         });
     }
 

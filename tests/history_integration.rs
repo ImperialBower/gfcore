@@ -10,6 +10,7 @@
 
 #![cfg(feature = "history")]
 
+use gfcore::bot::BotProfile;
 use gfcore::history::{GameCollection, GameRecord, TurnRecord};
 use gfcore::prelude::{Game, GameEvent, GamePhase, GameVariant, Player, PlayerAction};
 
@@ -134,6 +135,7 @@ fn play_and_record() -> GameRecord {
                 player: current_turn_player,
                 events: std::mem::take(&mut current_turn_events),
                 books_after_turn,
+                actions: None,
             });
 
             // Start fresh for the next turn.
@@ -159,6 +161,7 @@ fn play_and_record() -> GameRecord {
             player: current_turn_player,
             events: current_turn_events,
             books_after_turn,
+            actions: None,
         });
     }
 
@@ -362,4 +365,96 @@ fn test_game_collection_multiple_records() {
     assert_eq!(col, back);
     assert_eq!(back[0], r1);
     assert_eq!(back[1], r2);
+}
+
+// ---------------------------------------------------------------------------
+// Helper: play using Game::act() so actions are auto-recorded
+// ---------------------------------------------------------------------------
+
+/// Plays a Standard Go Fish game to completion using two `BotProfile` bots.
+///
+/// Returns `game.record()`, which has `TurnRecord::actions` populated for
+/// every turn (enabling replay) and `initial_draw_pile` set.
+fn play_game_with_bot_profiles() -> GameRecord {
+    let profiles = [BotProfile::basic("Alice"), BotProfile::basic("Bob")];
+    let players = vec![
+        Player::new("Alice".to_string()),
+        Player::new("Bob".to_string()),
+    ];
+    let mut game = Game::new(GameVariant::Standard, players).expect("valid 2-player game");
+
+    for _ in 0..13_000 {
+        if game.is_over() {
+            break;
+        }
+        let state = game.state().expect("state available");
+        let cp = state.current_player;
+        let action = match state.phase {
+            GamePhase::WaitingForDraw => PlayerAction::Draw,
+            GamePhase::GameOver => break,
+            _ => {
+                let hand = state
+                    .players
+                    .iter()
+                    .find(|v| v.index == cp)
+                    .and_then(|v| v.hand.as_ref())
+                    .cloned()
+                    .unwrap_or_default();
+                profiles[cp % profiles.len()].decide(&hand, &state.players, &state.ask_log)
+            }
+        };
+        game.act(action).expect("bot action must not error");
+    }
+
+    assert!(game.is_over(), "game must finish within budget");
+    game.record()
+}
+
+// ---------------------------------------------------------------------------
+// Audit integration tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_audit_all_on_played_collection() {
+    let mut col = GameCollection::new();
+    for _ in 0..5 {
+        col.push(play_game_with_bot_profiles());
+    }
+
+    let results = col.audit_all();
+    assert_eq!(results.len(), 5, "must have one audit result per game");
+
+    for (i, result) in results.iter().enumerate() {
+        assert!(
+            result.is_consistent,
+            "game {i} audit failed with violations: {:?}",
+            result.violations
+        );
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Replay integration tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_replay_all_on_played_collection() {
+    let mut col = GameCollection::new();
+    for _ in 0..5 {
+        col.push(play_game_with_bot_profiles());
+    }
+
+    let results = col.replay_all();
+    assert_eq!(results.len(), 5, "must have one replay result per game");
+
+    for (i, result) in results.iter().enumerate() {
+        let result = result
+            .as_ref()
+            .unwrap_or_else(|e| panic!("game {i} replay returned Err: {e}"));
+        assert!(
+            result.is_consistent,
+            "game {i} replay diverged at turn {:?}",
+            result.mismatch_at_turn
+        );
+    }
 }

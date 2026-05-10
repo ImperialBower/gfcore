@@ -1,4 +1,4 @@
-.PHONY: clean build test test-unit test-doc build-wasm test-wasm coverage build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri mutants tree tree-duplicates deny audit unused-deps install-tools install-nextest install-mutants install-llvm-cov install-wasm-bindgen-cli watch install-watch
+.PHONY: clean build test test-unit test-doc build-wasm test-wasm coverage build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri mutants marathon tree tree-duplicates deny audit unused-deps install-tools install-nextest install-mutants install-llvm-cov install-wasm-bindgen-cli watch install-watch
 
 # Default target
 default: ayce
@@ -12,6 +12,7 @@ help:
 	@echo "  make test            - Run all tests (nextest for unit, cargo test for doc)"
 	@echo "  make test-unit       - Run unit tests via cargo-nextest"
 	@echo "  make test-doc        - Run doc tests via cargo test --doc"
+	@echo "  make marathon        - Run 100-game bot marathon stress test"
 	@echo "  make build-wasm      - Build for wasm32-unknown-unknown with --features wasm"
 	@echo "  make test-wasm       - Run wasm runtime tests (requires wasm-bindgen-cli + node)"
 	@echo "  make coverage        - Generate test coverage report via cargo-llvm-cov"
@@ -69,6 +70,10 @@ define check_nextest
 		fi; \
 	fi
 endef
+
+# Run the 100-game bot marathon stress test
+marathon:
+	cargo test --test bot_marathon -- --include-ignored --nocapture
 
 # Run unit tests via nextest
 test-unit:

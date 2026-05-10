@@ -149,6 +149,38 @@ pub enum GfError {
     /// );
     /// ```
     ParseError(String),
+
+    /// A filesystem operation failed during save.
+    ///
+    /// The inner `String` contains the OS error message.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gfcore::prelude::GfError;
+    ///
+    /// let err = GfError::IoError("permission denied".to_string());
+    /// assert_eq!(err.to_string(), "io error: permission denied");
+    /// ```
+    IoError(String),
+
+    /// `replay()` was called on a record where at least one turn has no stored actions.
+    ///
+    /// This error is expected when replaying records produced before action
+    /// recording was added (e.g., WASM games or old tests).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gfcore::prelude::GfError;
+    ///
+    /// let err = GfError::NoReplayData;
+    /// assert_eq!(
+    ///     err.to_string(),
+    ///     "no replay data: record is missing actions or initial deck state",
+    /// );
+    /// ```
+    NoReplayData,
 }
 
 impl fmt::Display for GfError {
@@ -168,6 +200,10 @@ impl fmt::Display for GfError {
             Self::GameAlreadyOver => f.write_str("action called after the game has already ended"),
             Self::EmptyDrawPile => f.write_str("draw attempted on an empty draw pile"),
             Self::ParseError(msg) => write!(f, "parse error: {msg}"),
+            Self::IoError(msg) => write!(f, "io error: {msg}"),
+            Self::NoReplayData => {
+                f.write_str("no replay data: record is missing actions or initial deck state")
+            }
         }
     }
 }
@@ -247,9 +283,26 @@ mod tests {
             GfError::GameAlreadyOver,
             GfError::EmptyDrawPile,
             GfError::ParseError("bad".into()),
+            GfError::IoError("disk full".into()),
+            GfError::NoReplayData,
         ];
         for v in &variants {
             assert!(!v.to_string().is_empty(), "{v:?} Display must not be empty");
         }
+    }
+
+    #[test]
+    fn test_io_error_display() {
+        let err = GfError::IoError("permission denied".to_string());
+        assert_eq!(err.to_string(), "io error: permission denied");
+    }
+
+    #[test]
+    fn test_no_replay_data_display() {
+        let err = GfError::NoReplayData;
+        assert_eq!(
+            err.to_string(),
+            "no replay data: record is missing actions or initial deck state",
+        );
     }
 }
