@@ -36,6 +36,13 @@ thread_local! {
     static LAST_EVENT: RefCell<Option<GameEvent>> = const { RefCell::new(None) };
 }
 
+#[cfg(feature = "history")]
+thread_local! {
+    // GameCollection::new() allocates (String + Vec), so const { } is not possible here.
+    static COLLECTION: RefCell<crate::history::GameCollection> =
+        RefCell::new(crate::history::GameCollection::new());
+}
+
 // ---------------------------------------------------------------------------
 // Panic hook
 // ---------------------------------------------------------------------------
@@ -474,6 +481,100 @@ pub fn parse_game_collection(yaml: &str) -> String {
     }
 }
 
+/// Appends the current game's record to the session [`crate::history::GameCollection`].
+///
+/// Call this at game-over before starting a new game.  Returns `{"ok":true}`
+/// on success or `{"error":"..."}` if no game is in progress.
+///
+/// Requires the `history` feature.
+#[must_use]
+#[wasm_bindgen]
+pub fn collect_game() -> String {
+    #[cfg(feature = "history")]
+    {
+        GAME.with(|cell| {
+            let borrow = cell.borrow();
+            match borrow.as_ref() {
+                None => error_json("no game in progress"),
+                Some(game) => {
+                    let record = game.record();
+                    COLLECTION.with(|col| col.borrow_mut().push(record));
+                    "{\"ok\":true}".to_string()
+                }
+            }
+        })
+    }
+    #[cfg(not(feature = "history"))]
+    {
+        error_json("history feature is not enabled")
+    }
+}
+
+/// Resets the session [`crate::history::GameCollection`] to empty.
+#[wasm_bindgen]
+pub fn clear_collection() {
+    #[cfg(feature = "history")]
+    {
+        COLLECTION.with(|col| {
+            *col.borrow_mut() = crate::history::GameCollection::new();
+        });
+    }
+}
+
+/// Serialises the session [`crate::history::GameCollection`] as a YAML string.
+///
+/// Returns the raw YAML (not JSON-wrapped) so callers can pass it directly
+/// to gfcore CLI tools for offline audit/replay.  Returns `{"error":"..."}`
+/// if serialisation fails or the `history` feature is not enabled.
+#[must_use]
+#[wasm_bindgen]
+pub fn get_collection_yaml() -> String {
+    #[cfg(feature = "history")]
+    {
+        COLLECTION.with(|col| {
+            let borrow = col.borrow();
+            match borrow.to_yaml() {
+                Ok(yaml) => yaml,
+                Err(e) => error_json(&e.to_string()),
+            }
+        })
+    }
+    #[cfg(not(feature = "history"))]
+    {
+        error_json("history feature is not enabled")
+    }
+}
+
+/// Audits the current game's record and returns the [`crate::history::AuditResult`] as JSON.
+///
+/// Returns `{"error":"..."}` if no game is in progress or the `history`
+/// feature is not enabled.  The returned JSON object has the shape:
+/// `{ game_id, is_consistent, final_books, violations }`.
+#[must_use]
+#[wasm_bindgen]
+pub fn audit_current_game() -> String {
+    #[cfg(feature = "history")]
+    {
+        GAME.with(|cell| {
+            let borrow = cell.borrow();
+            match borrow.as_ref() {
+                None => error_json("no game in progress"),
+                Some(game) => {
+                    let audit = game.record().audit();
+                    match serde_json::to_string(&audit) {
+                        Ok(j) => j,
+                        Err(e) => error_json(&e.to_string()),
+                    }
+                }
+            }
+        })
+    }
+    #[cfg(not(feature = "history"))]
+    {
+        error_json("history feature is not enabled")
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -491,6 +592,8 @@ mod tests {
         GAME.with(|g| *g.borrow_mut() = None);
         PROFILES.with(|p| p.borrow_mut().clear());
         LAST_EVENT.with(|le| *le.borrow_mut() = None);
+        #[cfg(feature = "history")]
+        COLLECTION.with(|c| *c.borrow_mut() = crate::history::GameCollection::new());
     }
 
     fn is_error_json(s: &str) -> bool {
@@ -804,5 +907,108 @@ mod tests {
         let result = parse_game_collection(&yaml);
         assert!(!is_error_json(&result), "valid yaml should parse: {result}");
         assert!(!result.is_empty(), "result must not be empty");
+    }
+
+    // --- collect_game ---
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_collect_game_no_game_returns_error() {
+        reset_state();
+        let result = collect_game();
+        assert!(is_error_json(&result), "expected error without game: {result}");
+    }
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_collect_game_with_game_adds_to_collection() {
+        reset_state();
+        let _ = new_bot_game("Standard", 2, 0.0);
+        let result = collect_game();
+        assert_eq!(result, "{\"ok\":true}", "collect_game must return ok: {result}");
+        let yaml = get_collection_yaml();
+        assert!(!is_error_json(&yaml), "collection yaml must not error: {yaml}");
+        let col_json = parse_game_collection(&yaml);
+        let col = parse(&col_json);
+        assert_eq!(
+            col["games"].as_array().unwrap().len(),
+            1,
+            "collection must have 1 game: {col_json}"
+        );
+    }
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_collect_game_accumulates_across_calls() {
+        reset_state();
+        let _ = new_bot_game("Standard", 2, 0.0);
+        let _ = collect_game();
+        let _ = new_bot_game("Standard", 2, 0.0);
+        let _ = collect_game();
+        let yaml = get_collection_yaml();
+        let col_json = parse_game_collection(&yaml);
+        let col = parse(&col_json);
+        assert_eq!(
+            col["games"].as_array().unwrap().len(),
+            2,
+            "collection must have 2 games after two collects: {col_json}"
+        );
+    }
+
+    // --- clear_collection ---
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_clear_collection_empties_collection() {
+        reset_state();
+        let _ = new_bot_game("Standard", 2, 0.0);
+        let _ = collect_game();
+        clear_collection();
+        let yaml = get_collection_yaml();
+        assert!(!is_error_json(&yaml));
+        let col_json = parse_game_collection(&yaml);
+        let col = parse(&col_json);
+        assert_eq!(
+            col["games"].as_array().unwrap().len(),
+            0,
+            "collection must be empty after clear: {col_json}"
+        );
+    }
+
+    // --- get_collection_yaml ---
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_get_collection_yaml_empty_is_valid_yaml() {
+        reset_state();
+        let yaml = get_collection_yaml();
+        assert!(!is_error_json(&yaml), "empty collection must not error: {yaml}");
+        assert!(!yaml.is_empty());
+        let json = parse_game_collection(&yaml);
+        assert!(!is_error_json(&json), "empty collection yaml must parse: {json}");
+    }
+
+    // --- audit_current_game ---
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_audit_current_game_no_game_returns_error() {
+        reset_state();
+        let result = audit_current_game();
+        assert!(is_error_json(&result), "expected error without game: {result}");
+    }
+
+    #[cfg(feature = "history")]
+    #[test]
+    fn test_audit_current_game_with_game_returns_audit_json() {
+        reset_state();
+        let _ = new_bot_game("Standard", 2, 0.0);
+        let result = audit_current_game();
+        assert!(!is_error_json(&result), "audit must not error: {result}");
+        let v = parse(&result);
+        assert!(v.get("is_consistent").is_some(), "must have is_consistent: {result}");
+        assert!(v.get("game_id").is_some(), "must have game_id: {result}");
+        assert!(v.get("violations").is_some(), "must have violations: {result}");
+        assert!(v.get("final_books").is_some(), "must have final_books: {result}");
     }
 }
