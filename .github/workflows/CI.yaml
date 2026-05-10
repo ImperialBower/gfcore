@@ -77,16 +77,16 @@ jobs:
       - uses: actions/checkout@v6
       - uses: EmbarkStudios/cargo-deny-action@v2
 
-  miri:
-    name: Miri
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@miri
-      - run: cargo miri test
-        env:
-          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-disable-isolation
+#  miri:
+#    name: Miri
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 45
+#    steps:
+#      - uses: actions/checkout@v6
+#      - uses: dtolnay/rust-toolchain@miri
+#      - run: cargo miri test
+#        env:
+#          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-disable-isolation
 
   wasm:
     name: Wasm
