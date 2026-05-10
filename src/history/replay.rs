@@ -176,7 +176,6 @@ impl GameCollection {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::bot::BotProfile;
     use crate::error::GfError;
     use crate::game::{Game, GamePhase, PlayerAction};

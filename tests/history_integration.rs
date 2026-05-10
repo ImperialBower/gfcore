@@ -371,17 +371,18 @@ fn test_game_collection_multiple_records() {
 // Helper: play using Game::act() so actions are auto-recorded
 // ---------------------------------------------------------------------------
 
-/// Plays a Standard Go Fish game to completion using two `BotProfile` bots.
+/// Plays a Standard Go Fish game to completion using the default four bot profiles
+/// (the same setup used by `bot_marathon`).
 ///
 /// Returns `game.record()`, which has `TurnRecord::actions` populated for
 /// every turn (enabling replay) and `initial_draw_pile` set.
 fn play_game_with_bot_profiles() -> GameRecord {
-    let profiles = [BotProfile::basic("Alice"), BotProfile::basic("Bob")];
-    let players = vec![
-        Player::new("Alice".to_string()),
-        Player::new("Bob".to_string()),
-    ];
-    let mut game = Game::new(GameVariant::Standard, players).expect("valid 2-player game");
+    let profiles = BotProfile::default_profiles();
+    let players: Vec<Player> = profiles
+        .iter()
+        .map(|p| Player::new(p.name.clone()))
+        .collect();
+    let mut game = Game::new(GameVariant::Standard, players).expect("valid multi-player game");
 
     for _ in 0..13_000 {
         if game.is_over() {
