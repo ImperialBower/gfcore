@@ -916,7 +916,10 @@ mod tests {
     fn test_collect_game_no_game_returns_error() {
         reset_state();
         let result = collect_game();
-        assert!(is_error_json(&result), "expected error without game: {result}");
+        assert!(
+            is_error_json(&result),
+            "expected error without game: {result}"
+        );
     }
 
     #[cfg(feature = "history")]
@@ -925,9 +928,15 @@ mod tests {
         reset_state();
         let _ = new_bot_game("Standard", 2, 0.0);
         let result = collect_game();
-        assert_eq!(result, "{\"ok\":true}", "collect_game must return ok: {result}");
+        assert_eq!(
+            result, "{\"ok\":true}",
+            "collect_game must return ok: {result}"
+        );
         let yaml = get_collection_yaml();
-        assert!(!is_error_json(&yaml), "collection yaml must not error: {yaml}");
+        assert!(
+            !is_error_json(&yaml),
+            "collection yaml must not error: {yaml}"
+        );
         let col_json = parse_game_collection(&yaml);
         let col = parse(&col_json);
         assert_eq!(
@@ -982,10 +991,16 @@ mod tests {
     fn test_get_collection_yaml_empty_is_valid_yaml() {
         reset_state();
         let yaml = get_collection_yaml();
-        assert!(!is_error_json(&yaml), "empty collection must not error: {yaml}");
+        assert!(
+            !is_error_json(&yaml),
+            "empty collection must not error: {yaml}"
+        );
         assert!(!yaml.is_empty());
         let json = parse_game_collection(&yaml);
-        assert!(!is_error_json(&json), "empty collection yaml must parse: {json}");
+        assert!(
+            !is_error_json(&json),
+            "empty collection yaml must parse: {json}"
+        );
     }
 
     // --- audit_current_game ---
@@ -995,7 +1010,10 @@ mod tests {
     fn test_audit_current_game_no_game_returns_error() {
         reset_state();
         let result = audit_current_game();
-        assert!(is_error_json(&result), "expected error without game: {result}");
+        assert!(
+            is_error_json(&result),
+            "expected error without game: {result}"
+        );
     }
 
     #[cfg(feature = "history")]
@@ -1006,9 +1024,18 @@ mod tests {
         let result = audit_current_game();
         assert!(!is_error_json(&result), "audit must not error: {result}");
         let v = parse(&result);
-        assert!(v.get("is_consistent").is_some(), "must have is_consistent: {result}");
+        assert!(
+            v.get("is_consistent").is_some(),
+            "must have is_consistent: {result}"
+        );
         assert!(v.get("game_id").is_some(), "must have game_id: {result}");
-        assert!(v.get("violations").is_some(), "must have violations: {result}");
-        assert!(v.get("final_books").is_some(), "must have final_books: {result}");
+        assert!(
+            v.get("violations").is_some(),
+            "must have violations: {result}"
+        );
+        assert!(
+            v.get("final_books").is_some(),
+            "must have final_books: {result}"
+        );
     }
 }
