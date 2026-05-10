@@ -17,4 +17,4 @@ pub use crate::rules::{
 };
 
 #[cfg(feature = "history")]
-pub use crate::history::{GameCollection, GameRecord, TurnRecord};
+pub use crate::history::{AuditResult, GameCollection, GameRecord, ReplayResult, TurnRecord};
