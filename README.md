@@ -10,15 +10,6 @@
 
 Go Fish card game engine for the ImperialBower project ecosystem.
 
-## Usage
-
-Add `gfcore` to your `Cargo.toml`:
-
-```toml
-[dependencies]
-gfcore = "0.0.1"
-```
-
 Quick start — create a game, take a turn, inspect state:
 
 ```rust
