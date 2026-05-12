@@ -1,0 +1,2010 @@
+gfcore_version: 0.0.4
+format_version: 1
+games:
+- id: a3a88149-e43c-4c6f-b73b-36b6c1d3fc2a
+  variant: Standard Go Fish
+  timestamp: '0'
+  players:
+  - You
+  - Harriet
+  - Bertram
+  - Lucky
+  turns:
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 1
+      rank: T
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 8
+        pip_type: Rank
+        index: 'T'
+        symbol: 'T'
+        value: 10
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: J
+    - !Gave
+      from: 1
+      to: 2
+      rank: J
+      count: 1
+    - !Asked
+      asker: 2
+      target: 1
+      rank: J
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 9
+        pip_type: Rank
+        index: 'J'
+        symbol: 'J'
+        value: 10
+    - !Ask
+      target: 1
+      rank:
+        weight: 9
+        pip_type: Rank
+        index: 'J'
+        symbol: 'J'
+        value: 10
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 1
+      rank: '8'
+    - !Gave
+      from: 1
+      to: 3
+      rank: '8'
+      count: 1
+    - !Asked
+      asker: 3
+      target: 1
+      rank: '4'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 6
+        pip_type: Rank
+        index: '8'
+        symbol: '8'
+        value: 8
+    - !Ask
+      target: 1
+      rank:
+        weight: 2
+        pip_type: Rank
+        index: '4'
+        symbol: '4'
+        value: 4
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 2
+      rank: J
+    - !Gave
+      from: 2
+      to: 0
+      rank: J
+      count: 2
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '9'
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 9
+        pip_type: Rank
+        index: 'J'
+        symbol: 'J'
+        value: 10
+    - !Ask
+      target: 3
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: true
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 1
+      rank: A
+    - !Gave
+      from: 1
+      to: 3
+      rank: A
+      count: 1
+    - !Asked
+      asker: 3
+      target: 0
+      rank: '2'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: true
+    - !Asked
+      asker: 3
+      target: 0
+      rank: T
+    - !Gave
+      from: 0
+      to: 3
+      rank: T
+      count: 2
+    - !Asked
+      asker: 3
+      target: 2
+      rank: '2'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 0
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 12
+        pip_type: Rank
+        index: 'A'
+        symbol: 'A'
+        value: 11
+    - !Ask
+      target: 0
+      rank:
+        weight: 0
+        pip_type: Rank
+        index: '2'
+        symbol: '2'
+        value: 2
+    - Draw
+    - !Ask
+      target: 0
+      rank:
+        weight: 8
+        pip_type: Rank
+        index: 'T'
+        symbol: 'T'
+        value: 10
+    - !Ask
+      target: 2
+      rank:
+        weight: 0
+        pip_type: Rank
+        index: '2'
+        symbol: '2'
+        value: 2
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 3
+      rank: J
+    - !Gave
+      from: 3
+      to: 0
+      rank: J
+      count: 1
+    - !Book
+      player: 0
+      rank: J
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '4'
+    - !Gave
+      from: 3
+      to: 0
+      rank: '4'
+      count: 1
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '3'
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 3
+      rank:
+        weight: 9
+        pip_type: Rank
+        index: 'J'
+        symbol: 'J'
+        value: 10
+    - !Ask
+      target: 3
+      rank:
+        weight: 2
+        pip_type: Rank
+        index: '4'
+        symbol: '4'
+        value: 4
+    - !Ask
+      target: 3
+      rank:
+        weight: 1
+        pip_type: Rank
+        index: '3'
+        symbol: '3'
+        value: 3
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 1
+      rank: T
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 8
+        pip_type: Rank
+        index: 'T'
+        symbol: 'T'
+        value: 10
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 3
+      rank: Q
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 3
+      rank:
+        weight: 10
+        pip_type: Rank
+        index: 'Q'
+        symbol: 'Q'
+        value: 10
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !Gave
+      from: 0
+      to: 1
+      rank: K
+      count: 1
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 0
+      rank: '7'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 5
+        pip_type: Rank
+        index: '7'
+        symbol: '7'
+        value: 7
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '9'
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 1
+    - 0
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 3
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: K
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: true
+    - !Book
+      player: 1
+      rank: K
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !Gave
+      from: 0
+      to: 1
+      rank: '9'
+      count: 1
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 1
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 11
+        pip_type: Rank
+        index: 'K'
+        symbol: 'K'
+        value: 10
+    - Draw
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 1
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 2
+      rank: '7'
+    - !Gave
+      from: 2
+      to: 3
+      rank: '7'
+      count: 1
+    - !Asked
+      asker: 3
+      target: 2
+      rank: '7'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 1
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 5
+        pip_type: Rank
+        index: '7'
+        symbol: '7'
+        value: 7
+    - !Ask
+      target: 2
+      rank:
+        weight: 5
+        pip_type: Rank
+        index: '7'
+        symbol: '7'
+        value: 7
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 2
+      rank: '8'
+    - !Gave
+      from: 2
+      to: 0
+      rank: '8'
+      count: 1
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '8'
+    - !Gave
+      from: 3
+      to: 0
+      rank: '8'
+      count: 2
+    - !Book
+      player: 0
+      rank: '8'
+    - !Asked
+      asker: 0
+      target: 3
+      rank: Q
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 6
+        pip_type: Rank
+        index: '8'
+        symbol: '8'
+        value: 8
+    - !Ask
+      target: 3
+      rank:
+        weight: 6
+        pip_type: Rank
+        index: '8'
+        symbol: '8'
+        value: 8
+    - !Ask
+      target: 3
+      rank:
+        weight: 10
+        pip_type: Rank
+        index: 'Q'
+        symbol: 'Q'
+        value: 10
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 0
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 1
+      rank: '2'
+    - !Gave
+      from: 1
+      to: 3
+      rank: '2'
+      count: 1
+    - !Book
+      player: 3
+      rank: '2'
+    - !Asked
+      asker: 3
+      target: 0
+      rank: '7'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 1
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 0
+        pip_type: Rank
+        index: '2'
+        symbol: '2'
+        value: 2
+    - !Ask
+      target: 0
+      rank:
+        weight: 5
+        pip_type: Rank
+        index: '7'
+        symbol: '7'
+        value: 7
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 3
+      rank: '4'
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 1
+    actions:
+    - !Ask
+      target: 3
+      rank:
+        weight: 2
+        pip_type: Rank
+        index: '4'
+        symbol: '4'
+        value: 4
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 1
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 1
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 2
+      rank: T
+    - !Gave
+      from: 2
+      to: 3
+      rank: T
+      count: 1
+    - !Book
+      player: 3
+      rank: T
+    - !Asked
+      asker: 3
+      target: 0
+      rank: '6'
+    - !Gave
+      from: 0
+      to: 3
+      rank: '6'
+      count: 1
+    - !Asked
+      asker: 3
+      target: 1
+      rank: '7'
+    - !Gave
+      from: 1
+      to: 3
+      rank: '7'
+      count: 1
+    - !Book
+      player: 3
+      rank: '7'
+    - !Asked
+      asker: 3
+      target: 2
+      rank: A
+    - !Gave
+      from: 2
+      to: 3
+      rank: A
+      count: 1
+    - !Book
+      player: 3
+      rank: A
+    - !Asked
+      asker: 3
+      target: 2
+      rank: '6'
+    - !Gave
+      from: 2
+      to: 3
+      rank: '6'
+      count: 2
+    - !Book
+      player: 3
+      rank: '6'
+    - !Asked
+      asker: 3
+      target: 0
+      rank: '5'
+    - !GoFish
+      player: 3
+    - !Drew
+      player: 3
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 5
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 8
+        pip_type: Rank
+        index: 'T'
+        symbol: 'T'
+        value: 10
+    - !Ask
+      target: 0
+      rank:
+        weight: 4
+        pip_type: Rank
+        index: '6'
+        symbol: '6'
+        value: 6
+    - !Ask
+      target: 1
+      rank:
+        weight: 5
+        pip_type: Rank
+        index: '7'
+        symbol: '7'
+        value: 7
+    - !Ask
+      target: 2
+      rank:
+        weight: 12
+        pip_type: Rank
+        index: 'A'
+        symbol: 'A'
+        value: 11
+    - !Ask
+      target: 2
+      rank:
+        weight: 4
+        pip_type: Rank
+        index: '6'
+        symbol: '6'
+        value: 6
+    - !Ask
+      target: 0
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 2
+      rank: Q
+    - !Gave
+      from: 2
+      to: 0
+      rank: Q
+      count: 1
+    - !Asked
+      asker: 0
+      target: 3
+      rank: Q
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 5
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 10
+        pip_type: Rank
+        index: 'Q'
+        symbol: 'Q'
+        value: 10
+    - !Ask
+      target: 3
+      rank:
+        weight: 10
+        pip_type: Rank
+        index: 'Q'
+        symbol: 'Q'
+        value: 10
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 5
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '5'
+    - !GoFish
+      player: 2
+    - !Drew
+      player: 2
+      matched: false
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 5
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+    - Draw
+  - player: 3
+    events:
+    - !Asked
+      asker: 3
+      target: 2
+      rank: '5'
+    - !Gave
+      from: 2
+      to: 3
+      rank: '5'
+      count: 3
+    - !Book
+      player: 3
+      rank: '5'
+    books_after_turn:
+    - 2
+    - 1
+    - 0
+    - 6
+    actions:
+    - !Ask
+      target: 2
+      rank:
+        weight: 3
+        pip_type: Rank
+        index: '5'
+        symbol: '5'
+        value: 5
+  - player: 0
+    events:
+    - !Asked
+      asker: 0
+      target: 1
+      rank: Q
+    - !Gave
+      from: 1
+      to: 0
+      rank: Q
+      count: 1
+    - !Book
+      player: 0
+      rank: Q
+    - !Asked
+      asker: 0
+      target: 2
+      rank: '3'
+    - !Gave
+      from: 2
+      to: 0
+      rank: '3'
+      count: 1
+    - !Asked
+      asker: 0
+      target: 1
+      rank: '3'
+    - !Gave
+      from: 1
+      to: 0
+      rank: '3'
+      count: 2
+    - !Book
+      player: 0
+      rank: '3'
+    - !Asked
+      asker: 0
+      target: 1
+      rank: '4'
+    - !GoFish
+      player: 0
+    - !Drew
+      player: 0
+      matched: false
+    books_after_turn:
+    - 4
+    - 1
+    - 0
+    - 6
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 10
+        pip_type: Rank
+        index: 'Q'
+        symbol: 'Q'
+        value: 10
+    - !Ask
+      target: 2
+      rank:
+        weight: 1
+        pip_type: Rank
+        index: '3'
+        symbol: '3'
+        value: 3
+    - !Ask
+      target: 1
+      rank:
+        weight: 1
+        pip_type: Rank
+        index: '3'
+        symbol: '3'
+        value: 3
+    - !Ask
+      target: 1
+      rank:
+        weight: 2
+        pip_type: Rank
+        index: '4'
+        symbol: '4'
+        value: 4
+    - Draw
+  - player: 1
+    events:
+    - !Asked
+      asker: 1
+      target: 0
+      rank: '9'
+    - !GoFish
+      player: 1
+    - !Drew
+      player: 1
+      matched: false
+    books_after_turn:
+    - 4
+    - 1
+    - 0
+    - 6
+    actions:
+    - !Ask
+      target: 0
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+    - Draw
+  - player: 2
+    events:
+    - !Asked
+      asker: 2
+      target: 1
+      rank: '9'
+    - !Gave
+      from: 1
+      to: 2
+      rank: '9'
+      count: 3
+    - !Book
+      player: 2
+      rank: '9'
+    books_after_turn:
+    - 4
+    - 1
+    - 1
+    - 6
+    actions:
+    - !Ask
+      target: 1
+      rank:
+        weight: 7
+        pip_type: Rank
+        index: '9'
+        symbol: '9'
+        value: 9
+  winner: 3
+  initial_draw_pile:
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 2
+      pip_type: Rank
+      index: '4'
+      symbol: '4'
+      value: 4
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 12
+      pip_type: Rank
+      index: 'A'
+      symbol: 'A'
+      value: 11
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 5
+      pip_type: Rank
+      index: '7'
+      symbol: '7'
+      value: 7
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 9
+      pip_type: Rank
+      index: 'J'
+      symbol: 'J'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 1
+      pip_type: Rank
+      index: '3'
+      symbol: '3'
+      value: 3
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 6
+      pip_type: Rank
+      index: '8'
+      symbol: '8'
+      value: 8
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 3
+      pip_type: Rank
+      index: '5'
+      symbol: '5'
+      value: 5
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 0
+      pip_type: Rank
+      index: '2'
+      symbol: '2'
+      value: 2
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 7
+      pip_type: Rank
+      index: '9'
+      symbol: '9'
+      value: 9
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 5
+      pip_type: Rank
+      index: '7'
+      symbol: '7'
+      value: 7
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 7
+      pip_type: Rank
+      index: '9'
+      symbol: '9'
+      value: 9
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 5
+      pip_type: Rank
+      index: '7'
+      symbol: '7'
+      value: 7
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 8
+      pip_type: Rank
+      index: 'T'
+      symbol: 'T'
+      value: 10
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 9
+      pip_type: Rank
+      index: 'J'
+      symbol: 'J'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 6
+      pip_type: Rank
+      index: '8'
+      symbol: '8'
+      value: 8
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 6
+      pip_type: Rank
+      index: '8'
+      symbol: '8'
+      value: 8
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 2
+      pip_type: Rank
+      index: '4'
+      symbol: '4'
+      value: 4
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 11
+      pip_type: Rank
+      index: 'K'
+      symbol: 'K'
+      value: 10
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 12
+      pip_type: Rank
+      index: 'A'
+      symbol: 'A'
+      value: 11
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 3
+      pip_type: Rank
+      index: '5'
+      symbol: '5'
+      value: 5
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 8
+      pip_type: Rank
+      index: 'T'
+      symbol: 'T'
+      value: 10
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 11
+      pip_type: Rank
+      index: 'K'
+      symbol: 'K'
+      value: 10
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 1
+      pip_type: Rank
+      index: '3'
+      symbol: '3'
+      value: 3
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 8
+      pip_type: Rank
+      index: 'T'
+      symbol: 'T'
+      value: 10
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 9
+      pip_type: Rank
+      index: 'J'
+      symbol: 'J'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 0
+      pip_type: Rank
+      index: '2'
+      symbol: '2'
+      value: 2
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 9
+      pip_type: Rank
+      index: 'J'
+      symbol: 'J'
+      value: 10
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 2
+      pip_type: Rank
+      index: '4'
+      symbol: '4'
+      value: 4
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 10
+      pip_type: Rank
+      index: 'Q'
+      symbol: 'Q'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 10
+      pip_type: Rank
+      index: 'Q'
+      symbol: 'Q'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 3
+      pip_type: Rank
+      index: '5'
+      symbol: '5'
+      value: 5
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 12
+      pip_type: Rank
+      index: 'A'
+      symbol: 'A'
+      value: 11
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 6
+      pip_type: Rank
+      index: '8'
+      symbol: '8'
+      value: 8
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 1
+      pip_type: Rank
+      index: '3'
+      symbol: '3'
+      value: 3
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 3
+      pip_type: Rank
+      index: '5'
+      symbol: '5'
+      value: 5
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 8
+      pip_type: Rank
+      index: 'T'
+      symbol: 'T'
+      value: 10
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 0
+      pip_type: Rank
+      index: '2'
+      symbol: '2'
+      value: 2
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 5
+      pip_type: Rank
+      index: '7'
+      symbol: '7'
+      value: 7
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 10
+      pip_type: Rank
+      index: 'Q'
+      symbol: 'Q'
+      value: 10
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 7
+      pip_type: Rank
+      index: '9'
+      symbol: '9'
+      value: 9
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 10
+      pip_type: Rank
+      index: 'Q'
+      symbol: 'Q'
+      value: 10
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 4
+      pip_type: Rank
+      index: '6'
+      symbol: '6'
+      value: 6
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 11
+      pip_type: Rank
+      index: 'K'
+      symbol: 'K'
+      value: 10
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 7
+      pip_type: Rank
+      index: '9'
+      symbol: '9'
+      value: 9
+  - suit:
+      weight: 1
+      pip_type: Suit
+      index: 'D'
+      symbol: '♦'
+      value: 2
+    rank:
+      weight: 4
+      pip_type: Rank
+      index: '6'
+      symbol: '6'
+      value: 6
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 0
+      pip_type: Rank
+      index: '2'
+      symbol: '2'
+      value: 2
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 2
+      pip_type: Rank
+      index: '4'
+      symbol: '4'
+      value: 4
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 11
+      pip_type: Rank
+      index: 'K'
+      symbol: 'K'
+      value: 10
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 1
+      pip_type: Rank
+      index: '3'
+      symbol: '3'
+      value: 3
+  - suit:
+      weight: 3
+      pip_type: Suit
+      index: 'S'
+      symbol: '♠'
+      value: 4
+    rank:
+      weight: 4
+      pip_type: Rank
+      index: '6'
+      symbol: '6'
+      value: 6
+  - suit:
+      weight: 2
+      pip_type: Suit
+      index: 'H'
+      symbol: '♥'
+      value: 3
+    rank:
+      weight: 12
+      pip_type: Rank
+      index: 'A'
+      symbol: 'A'
+      value: 11
+  - suit:
+      weight: 0
+      pip_type: Suit
+      index: 'C'
+      symbol: '♣'
+      value: 1
+    rank:
+      weight: 4
+      pip_type: Rank
+      index: '6'
+      symbol: '6'
+      value: 6

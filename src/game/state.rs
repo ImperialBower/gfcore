@@ -699,7 +699,8 @@ impl Game {
             return Ok(drew_event);
         };
 
-        let matched = asked_rank == Some(card.rank);
+        let drawn_rank = card.rank;
+        let matched = asked_rank == Some(drawn_rank);
 
         self.players[cp].receive_card(card);
 
@@ -711,30 +712,33 @@ impl Game {
         #[cfg(feature = "history")]
         self.push_event(&drew_event);
 
-        let last_event = if matched {
-            // Check whether the drawn card completes a book.
-            if let Some(ref r) = asked_rank {
-                let rules = self.variant.rules();
-                if Self::check_and_collect_book(&mut self.players, cp, r, rules) {
-                    let book_event = GameEvent::Book {
-                        player: cp,
-                        rank: r.index.to_string(),
-                    };
-                    self.last_event = Some(book_event.clone());
-                    #[cfg(feature = "history")]
-                    self.push_event(&book_event);
-                    // Signal callers that a book was just completed; same player acts again.
-                    self.phase = GamePhase::BookCompleted;
-                    book_event
-                } else {
-                    // Drew the asked rank but no book yet — same player keeps turn.
-                    self.phase = GamePhase::WaitingForAsk;
-                    drew_event
-                }
+        // Always check the drawn card's rank for book completion — a
+        // non-matching draw can still complete a book of its own rank
+        // (player held three of X, asked for Y, drew the fourth X).
+        let rules = self.variant.rules();
+        let book_formed = Self::check_and_collect_book(&mut self.players, cp, &drawn_rank, rules);
+
+        let last_event = if book_formed {
+            let book_event = GameEvent::Book {
+                player: cp,
+                rank: drawn_rank.index.to_string(),
+            };
+            self.last_event = Some(book_event.clone());
+            #[cfg(feature = "history")]
+            self.push_event(&book_event);
+            if matched {
+                // Drew the asked rank and completed a book — same player acts again.
+                self.phase = GamePhase::BookCompleted;
             } else {
+                // Drew a non-asked rank that completed a book — turn still ends.
+                self.advance_turn();
                 self.phase = GamePhase::WaitingForAsk;
-                drew_event
             }
+            book_event
+        } else if matched {
+            // Drew the asked rank but no book yet — same player keeps turn.
+            self.phase = GamePhase::WaitingForAsk;
+            drew_event
         } else {
             // Didn't match — next player's turn.
             self.advance_turn();
@@ -1267,6 +1271,58 @@ mod tests {
             matches!(result, GameEvent::Drew { matched: false, .. }),
             "expected matched=false, got {result:?}"
         );
+    }
+
+    #[test]
+    fn test_handle_draw_forms_book_on_non_matching_draw() {
+        // Regression test for gf-history-1778474562.yaml: a non-matching draw
+        // can still complete a book of the drawn card's rank. Player 0 holds
+        // three 4s plus a 9, asks for 9 (Go Fish), draws the fourth 4. The
+        // book of 4s must form even though matched=false; the turn still
+        // advances to player 1 per the standard "no match ends turn" rule.
+        use cardpack::prelude::FrenchBasicCard;
+        let mut game = two_player_game();
+        clear_hand(&mut game.players[0]);
+        clear_hand(&mut game.players[1]);
+        // P0: three 4s + one 9.
+        game.players[0].receive_card(FrenchBasicCard::FOUR_SPADES);
+        game.players[0].receive_card(FrenchBasicCard::FOUR_HEARTS);
+        game.players[0].receive_card(FrenchBasicCard::FOUR_DIAMONDS);
+        game.players[0].receive_card(FrenchBasicCard::NINE_SPADES);
+        // P1: one Ace + one 9 (sharing the 9 rank with P0 keeps the game
+        // out of deadlock-triggered GameOver after the draw).
+        game.players[1].receive_card(FrenchBasicCard::ACE_SPADES);
+        game.players[1].receive_card(FrenchBasicCard::NINE_HEARTS);
+
+        game.phase = GamePhase::WaitingForDraw;
+        game.last_asked_rank = Some(FrenchBasicCard::NINE_SPADES.rank);
+        // Pile has the fourth 4 on top, plus a non-book filler so the pile
+        // is non-empty after the draw and the win-condition check is a no-op.
+        game.draw_pile = BasicPile::from(vec![
+            FrenchBasicCard::FOUR_CLUBS,
+            FrenchBasicCard::KING_SPADES,
+        ]);
+
+        let result = game.act(PlayerAction::Draw).unwrap();
+
+        match result {
+            GameEvent::Book { player, ref rank } => {
+                assert_eq!(player, 0, "book must be credited to player 0");
+                assert_eq!(rank, "4", "book must be of rank 4");
+            }
+            other => panic!("expected Book event, got {other:?}"),
+        }
+        assert_eq!(
+            game.players[0].book_count(),
+            1,
+            "player 0 should hold 1 book"
+        );
+        assert_eq!(
+            game.current_player(),
+            1,
+            "turn must advance on non-matching draw even when a book forms"
+        );
+        assert_eq!(*game.phase(), GamePhase::WaitingForAsk);
     }
 
     // --- replenish_until_has_cards (lines 702-723) ---
