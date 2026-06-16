@@ -72,9 +72,12 @@ allow = []
 # which is now empty, so any of these appearing means a non-pure crate leaked
 # into the kernel. Keep convenience deps `optional = true` behind features.
 #
-# NOTE intentionally NOT listed (present in the pure tree today, cannot be banned
-# yet): `serde_json` (gfcore non-optional dep — make optional to close), and
-# `serde_norway` (pulled transitively by `cardpack`, an upstream concern).
+# NOTE intentionally NOT listed:
+#   - `serde_json`: now opt-in (behind `history`/`wasm`) so it is OUT of the pure
+#     library tree, but it remains a dev-dependency and cargo-deny includes
+#     dev-deps — banning it here would false-positive. Its absence from the
+#     shipped kernel is enforced by kernel-purity.yml (`cargo tree --edges normal`).
+#   - `serde_norway`: pulled transitively by `cardpack` (an upstream concern).
 deny = [
     # Concrete serialization formats (the `serde` trait itself is fine):
     { name = "serde_yaml" },

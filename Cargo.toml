@@ -29,16 +29,18 @@ exclude = [
 [features]
 default = []
 full    = ["history"]
-history = ["dep:uuid", "dep:serde_norway"]
-wasm    = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "dep:getrandom"]
+history = ["dep:uuid", "dep:serde_norway", "dep:serde_json"]
+wasm    = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "dep:getrandom", "dep:serde_json"]
 
 [dependencies]
 mutants      = "0.0.3"
 cardpack     = "0.7.0"
 serde        = { version = "1.0", features = ["derive"] }
-serde_json   = "1.0"
 rand         = "0.9"
 log          = "0.4"
+
+# history + wasm feature (JSON round-trips / wasm bridge — opt-in, not in the kernel)
+serde_json   = { version = "1.0",                  optional = true }
 
 # history feature
 uuid         = { version = "1", features = ["v4"], optional = true }

@@ -2,10 +2,12 @@
 # pure build (no default features) must compile, and no adapter-layer crate may
 # appear in its dependency tree.
 #
-# BANNED is calibrated to what is *achievable today*. Two format crates are
-# knowingly excluded because they are in the pure tree right now:
-#   - serde_json   : gfcore non-optional dep (make optional to close, then add here)
+# BANNED is calibrated to what is *achievable today*. `serde_json` is now opt-in
+# (behind `history`/`wasm`) so it is asserted absent here. One format crate is
+# still knowingly excluded:
 #   - serde_norway : pulled transitively by cardpack (upstream concern)
+# The check uses `--edges normal`, so dev-dependencies (serde_json is still one,
+# for tests) do not count against the shipped kernel.
 # Clippy and cargo-deny bans run in the main CI workflow (CI.yaml); this workflow
 # owns only the no-default-features build + tree assertion.
 
@@ -17,7 +19,7 @@ on:
 
 env:
   # Pipe-separated crate names that must be ABSENT from the pure dependency tree.
-  BANNED: "uuid|tokio|async-std|reqwest|hyper|tonic|axum|rusqlite|sqlx|serde_yaml|serde_yaml_bw"
+  BANNED: "uuid|serde_json|tokio|async-std|reqwest|hyper|tonic|axum|rusqlite|sqlx|serde_yaml|serde_yaml_bw"
 
 jobs:
   purity:
