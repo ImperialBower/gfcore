@@ -6,8 +6,6 @@
 
 use cardpack::prelude::BasicPile;
 use serde::{Deserialize, Serialize};
-#[cfg(not(target_arch = "wasm32"))]
-use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use crate::error::GfError;
@@ -85,9 +83,11 @@ pub struct TurnRecord {
 /// assert_eq!(record.players, vec!["Alice", "Bob"]);
 /// assert!(record.turns.is_empty());
 /// assert!(record.winner.is_none());
-/// // id is a UUID v4 string; timestamp is a Unix epoch seconds string.
+/// // id is a fresh UUID v4; the timestamp defaults to "0" — inject a real one
+/// // with `with_timestamp` from code that owns a clock.
 /// assert!(!record.id.is_empty());
-/// assert!(!record.timestamp.is_empty());
+/// assert_eq!(record.timestamp, "0");
+/// assert_eq!(record.with_timestamp(1_700_000_000).timestamp, "1700000000");
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GameRecord {
@@ -95,7 +95,8 @@ pub struct GameRecord {
     pub id: String,
     /// Variant name, e.g. `"Standard"`.
     pub variant: String,
-    /// Unix epoch seconds as a string (set at record creation time).
+    /// Unix epoch seconds as a string. Defaults to `"0"`; set a real value via
+    /// [`GameRecord::with_timestamp`] (the kernel keeps no clock of its own).
     pub timestamp: String,
     /// Display names of all players, in turn order.
     pub players: Vec<String>,
@@ -110,7 +111,11 @@ pub struct GameRecord {
 }
 
 impl GameRecord {
-    /// Creates a new [`GameRecord`] with a fresh UUID and the current timestamp.
+    /// Creates a new [`GameRecord`] with a fresh UUID and an unset timestamp.
+    ///
+    /// The record reads no clock of its own — a kernel is deterministic — so the
+    /// timestamp defaults to `"0"`. To stamp a real time, chain
+    /// [`GameRecord::with_timestamp`] from the delivery layer that owns a clock.
     ///
     /// # Examples
     ///
@@ -122,26 +127,41 @@ impl GameRecord {
     /// assert_eq!(record.players.len(), 2);
     /// assert!(record.turns.is_empty());
     /// assert!(record.winner.is_none());
+    /// assert_eq!(record.timestamp, "0");
     /// ```
     #[must_use]
     pub fn new(variant: impl Into<String>, players: Vec<String>) -> Self {
-        #[cfg(not(target_arch = "wasm32"))]
-        let ts = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs()
-            .to_string();
-        #[cfg(target_arch = "wasm32")]
-        let ts = "0".to_string();
         Self {
             id: Uuid::new_v4().to_string(),
             variant: variant.into(),
-            timestamp: ts,
+            timestamp: "0".to_string(),
             players,
             turns: Vec::new(),
             winner: None,
             initial_draw_pile: None,
         }
+    }
+
+    /// Returns this record with its timestamp set to `timestamp` (Unix epoch
+    /// seconds).
+    ///
+    /// Time is injected rather than read from a clock, keeping the kernel
+    /// deterministic; call this from the delivery layer (CLI, service, harness)
+    /// that owns a clock.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use gfcore::history::GameRecord;
+    ///
+    /// let record = GameRecord::new("Standard", vec!["Alice".to_string()])
+    ///     .with_timestamp(1_700_000_000);
+    /// assert_eq!(record.timestamp, "1700000000");
+    /// ```
+    #[must_use]
+    pub fn with_timestamp(mut self, timestamp: u64) -> Self {
+        self.timestamp = timestamp.to_string();
+        self
     }
 
     /// Serializes this record to a YAML string.
@@ -464,11 +484,16 @@ mod tests {
     }
 
     #[test]
-    fn test_game_record_new_has_timestamp() {
+    fn test_game_record_new_has_unset_timestamp() {
         let r = make_record();
-        let ts: u64 = r.timestamp.parse().unwrap();
-        // timestamp must be a plausible Unix epoch (after year 2020)
-        assert!(ts > 1_600_000_000);
+        // The kernel reads no clock; the timestamp is unset until injected.
+        assert_eq!(r.timestamp, "0");
+    }
+
+    #[test]
+    fn test_game_record_with_timestamp_injects_value() {
+        let r = make_record().with_timestamp(1_700_000_000);
+        assert_eq!(r.timestamp, "1700000000");
     }
 
     #[test]

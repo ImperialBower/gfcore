@@ -1,11 +1,10 @@
 # Kernel purity lints for gfcore. These ban the entry points a pure domain
 # kernel must not use, so they are caught at lint time rather than review time.
 #
-# Filesystem bans are active: the only sanctioned I/O lives in the
-# `history::persist` adapter, which opts out locally with
-# `#[allow(clippy::disallowed_methods, clippy::disallowed_types)]`. The one
-# remaining commented entry is `SystemTime::now`, still used by `GameRecord::new`
-# (assessment Finding #3); uncomment it once that timestamp is injected.
+# All kernel-purity bans are active. The only sanctioned filesystem I/O lives in
+# the `history::persist` adapter, which opts out locally with
+# `#[allow(clippy::disallowed_methods, clippy::disallowed_types)]`. Timestamps are
+# injected via `GameRecord::with_timestamp`, so the kernel reads no clock.
 
 disallowed-types = [
     { path = "std::net::TcpStream",   reason = "no network in a pure kernel" },
@@ -23,8 +22,7 @@ disallowed-methods = [
     { path = "std::fs::create_dir_all", reason = "kernel must not touch the filesystem" },
     { path = "std::env::var",           reason = "kernel must not read the environment" },
     { path = "std::env::vars",          reason = "kernel must not read the environment" },
-    # Uncomment once GameRecord timestamps are injected rather than read from the clock:
-    # { path = "std::time::SystemTime::now", reason = "inject time; a kernel is deterministic" },
+    { path = "std::time::SystemTime::now", reason = "inject time; a kernel is deterministic" },
 ]
 
 # Runtime / transport crates (tokio, reqwest, tonic, …) are kept out of the
