@@ -67,8 +67,30 @@ wildcards = "warn"
 highlight = "all"
 # List of crates that are allowed. Use with care!
 allow = []
-# List of crates to deny
-deny = []
+# Kernel-purity bans: these adapter-layer crates must never enter gfcore's
+# default (pure) dependency graph. cargo-deny resolves the default feature set,
+# which is now empty, so any of these appearing means a non-pure crate leaked
+# into the kernel. Keep convenience deps `optional = true` behind features.
+#
+# NOTE intentionally NOT listed (present in the pure tree today, cannot be banned
+# yet): `serde_json` (gfcore non-optional dep — make optional to close), and
+# `serde_norway` (pulled transitively by `cardpack`, an upstream concern).
+deny = [
+    # Concrete serialization formats (the `serde` trait itself is fine):
+    { name = "serde_yaml" },
+    { name = "serde_yaml_bw" },
+    # Async runtimes:
+    { name = "tokio" },
+    { name = "async-std" },
+    # Transport / RPC / HTTP:
+    { name = "reqwest" },
+    { name = "hyper" },
+    { name = "tonic" },
+    { name = "axum" },
+    # Storage engines:
+    { name = "rusqlite" },
+    { name = "sqlx" },
+]
 # Certain crates/versions that will be skipped when doing duplicate detection.
 skip = [
     # getrandom 0.3 (via cardpack/rand) and getrandom 0.4 (via uuid) pull different r-efi versions

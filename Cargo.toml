@@ -1,7 +1,7 @@
 [package]
 name = "gfcore"
 description = "Go Fish card game engine"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
@@ -23,8 +23,12 @@ exclude = [
     "CLAUDE.md",
 ]
 
+# Pure-by-default: a bare `cargo add gfcore` yields the pure game kernel.
+# Serialization / persistence convenience is opt-in via `history` (or the `full`
+# umbrella). See .github/workflows/kernel-purity.yml for the enforced definition.
 [features]
-default = ["history"]
+default = []
+full    = ["history"]
 history = ["dep:uuid", "dep:serde_norway"]
 wasm    = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "dep:getrandom"]
 
