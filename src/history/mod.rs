@@ -31,6 +31,10 @@
 //! ```
 
 pub mod audit;
+/// Filesystem persistence adapter (feature `persistence`) — the I/O seam outside
+/// the pure history kernel.
+#[cfg(feature = "persistence")]
+pub mod persist;
 pub mod record;
 pub mod replay;
 

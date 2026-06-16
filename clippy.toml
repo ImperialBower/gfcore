@@ -1,0 +1,30 @@
+# Kernel purity lints for gfcore. These ban the entry points a pure domain
+# kernel must not use, so they are caught at lint time rather than review time.
+#
+# All kernel-purity bans are active. The only sanctioned filesystem I/O lives in
+# the `history::persist` adapter, which opts out locally with
+# `#[allow(clippy::disallowed_methods, clippy::disallowed_types)]`. Timestamps are
+# injected via `GameRecord::with_timestamp`, so the kernel reads no clock.
+
+disallowed-types = [
+    { path = "std::net::TcpStream",   reason = "no network in a pure kernel" },
+    { path = "std::net::TcpListener", reason = "no network in a pure kernel" },
+    { path = "std::process::Command", reason = "no process spawning in a pure kernel" },
+    { path = "std::fs::File",         reason = "no filesystem I/O in a pure kernel" },
+    { path = "std::path::Path",       reason = "a kernel takes bytes/&str, not paths — let an adapter own the filesystem" },
+    { path = "std::path::PathBuf",    reason = "filesystem policy belongs in an adapter, not the kernel" },
+]
+
+disallowed-methods = [
+    { path = "std::fs::read",           reason = "kernel must not read the filesystem" },
+    { path = "std::fs::read_to_string", reason = "kernel must not read the filesystem" },
+    { path = "std::fs::write",          reason = "kernel must not write the filesystem" },
+    { path = "std::fs::create_dir_all", reason = "kernel must not touch the filesystem" },
+    { path = "std::env::var",           reason = "kernel must not read the environment" },
+    { path = "std::env::vars",          reason = "kernel must not read the environment" },
+    { path = "std::time::SystemTime::now", reason = "inject time; a kernel is deterministic" },
+]
+
+# Runtime / transport crates (tokio, reqwest, tonic, …) are kept out of the
+# dependency graph entirely via cargo-deny `[bans]` in deny.toml — stronger than
+# a per-call lint.

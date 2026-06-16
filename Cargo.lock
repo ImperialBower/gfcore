@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "gfcore"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "cardpack",
  "console_error_panic_hook",

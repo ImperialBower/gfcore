@@ -1,0 +1,44 @@
+# Kernel-purity CI: the testable definition of gfcore as a domain kernel. The
+# pure build (no default features) must compile, and no adapter-layer crate may
+# appear in its dependency tree.
+#
+# BANNED is calibrated to what is *achievable today*. `serde_json` is now opt-in
+# (behind `history`/`wasm`) so it is asserted absent here. One format crate is
+# still knowingly excluded:
+#   - serde_norway : pulled transitively by cardpack (upstream concern)
+# The check uses `--edges normal`, so dev-dependencies (serde_json is still one,
+# for tests) do not count against the shipped kernel.
+# Clippy and cargo-deny bans run in the main CI workflow (CI.yaml); this workflow
+# owns only the no-default-features build + tree assertion.
+
+name: kernel-purity
+
+on:
+  push:
+  pull_request:
+
+env:
+  # Pipe-separated crate names that must be ABSENT from the pure dependency tree.
+  BANNED: "uuid|serde_json|tokio|async-std|reqwest|hyper|tonic|axum|rusqlite|sqlx|serde_yaml|serde_yaml_bw"
+
+jobs:
+  purity:
+    name: Pure kernel builds and stays I/O-free
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+
+      # 1. The pure kernel must compile with no default features.
+      - run: cargo check --no-default-features --lib --tests
+
+      # 2. No banned (I/O / format / transport) crate may be in the pure tree.
+      - name: Assert pure dependency tree is free of adapter crates
+        run: |
+          if cargo tree --no-default-features --edges normal --prefix none \
+               | sort -u | grep -E "^($BANNED) " ; then
+            echo "::error::banned crate present in the pure (no-default-features) build"
+            exit 1
+          fi
+          echo "pure kernel dependency tree is clean"

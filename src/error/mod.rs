@@ -214,6 +214,11 @@ impl std::error::Error for GfError {}
 ///
 /// This allows using `?` when deserializing JSON game history.
 ///
+/// `serde_json` is an opt-in (format) dependency, so this impl — and its doc
+/// test — are only compiled when the `history` feature is enabled. (The `wasm`
+/// bridge also pulls `serde_json`, but calls it directly rather than through
+/// this conversion.)
+///
 /// # Examples
 ///
 /// ```
@@ -223,6 +228,7 @@ impl std::error::Error for GfError {}
 /// let gf_err = GfError::from(json_err.unwrap_err());
 /// assert!(matches!(gf_err, GfError::ParseError(_)));
 /// ```
+#[cfg(feature = "history")]
 impl From<serde_json::Error> for GfError {
     fn from(err: serde_json::Error) -> Self {
         Self::ParseError(err.to_string())
