@@ -28,8 +28,11 @@ exclude = [
 # umbrella). See .github/workflows/kernel-purity.yml for the enforced definition.
 [features]
 default = []
-full    = ["history"]
-history = ["dep:uuid", "dep:serde_norway", "dep:serde_json"]
+full        = ["persistence"]
+history     = ["dep:uuid", "dep:serde_norway", "dep:serde_json"]
+# Filesystem persistence adapter (history::persist). Opt-in: a bare `history`
+# build serializes but performs no filesystem I/O.
+persistence = ["history"]
 wasm    = ["dep:wasm-bindgen", "dep:console_error_panic_hook", "dep:getrandom", "dep:serde_json"]
 
 [dependencies]

@@ -1,31 +1,28 @@
 # Kernel purity lints for gfcore. These ban the entry points a pure domain
 # kernel must not use, so they are caught at lint time rather than review time.
 #
-# Active entries below are ones the kernel core does NOT currently use, so they
-# lock in good behaviour with zero churn. The commented entries are violated only
-# by `history::GameCollection::{save, save_to}` and `GameRecord::new` (filesystem
-# + clock — assessment Finding #2/#3, deferred). Uncomment each as that I/O moves
-# to an adapter / the timestamp is injected; until then they would break
-# `cargo clippy --all-features`.
+# Filesystem bans are active: the only sanctioned I/O lives in the
+# `history::persist` adapter, which opts out locally with
+# `#[allow(clippy::disallowed_methods, clippy::disallowed_types)]`. The one
+# remaining commented entry is `SystemTime::now`, still used by `GameRecord::new`
+# (assessment Finding #3); uncomment it once that timestamp is injected.
 
 disallowed-types = [
     { path = "std::net::TcpStream",   reason = "no network in a pure kernel" },
     { path = "std::net::TcpListener", reason = "no network in a pure kernel" },
     { path = "std::process::Command", reason = "no process spawning in a pure kernel" },
     { path = "std::fs::File",         reason = "no filesystem I/O in a pure kernel" },
-    # Uncomment once GameCollection::save_to moves to an adapter (it builds a Path):
-    # { path = "std::path::Path",    reason = "a kernel takes bytes/&str, not paths — let an adapter own the filesystem" },
-    # { path = "std::path::PathBuf", reason = "filesystem policy belongs in an adapter, not the kernel" },
+    { path = "std::path::Path",       reason = "a kernel takes bytes/&str, not paths — let an adapter own the filesystem" },
+    { path = "std::path::PathBuf",    reason = "filesystem policy belongs in an adapter, not the kernel" },
 ]
 
 disallowed-methods = [
     { path = "std::fs::read",           reason = "kernel must not read the filesystem" },
     { path = "std::fs::read_to_string", reason = "kernel must not read the filesystem" },
+    { path = "std::fs::write",          reason = "kernel must not write the filesystem" },
+    { path = "std::fs::create_dir_all", reason = "kernel must not touch the filesystem" },
     { path = "std::env::var",           reason = "kernel must not read the environment" },
     { path = "std::env::vars",          reason = "kernel must not read the environment" },
-    # Uncomment once GameCollection::save/save_to moves to an adapter:
-    # { path = "std::fs::write",          reason = "kernel must not write the filesystem" },
-    # { path = "std::fs::create_dir_all", reason = "kernel must not touch the filesystem" },
     # Uncomment once GameRecord timestamps are injected rather than read from the clock:
     # { path = "std::time::SystemTime::now", reason = "inject time; a kernel is deterministic" },
 ]

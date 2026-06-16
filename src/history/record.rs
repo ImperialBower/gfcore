@@ -425,65 +425,8 @@ impl GameCollection {
         serde_json::from_str(s).map_err(GfError::from)
     }
 
-    /// Writes this collection to `generated/<run_name>_<unix_ts>.yaml`.
-    ///
-    /// The `generated/` directory is relative to the process's current working
-    /// directory and is created automatically if it does not already exist.
-    /// Returns the path written on success.
-    ///
-    /// # Errors
-    ///
-    /// - [`GfError::IoError`] — directory creation or file write failed.
-    /// - [`GfError::ParseError`] — YAML serialization failed.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use gfcore::history::GameCollection;
-    ///
-    /// let col = GameCollection::new();
-    /// let path = col.save("my_session").expect("save must succeed");
-    /// assert!(path.contains("my_session"));
-    /// ```
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn save(&self, run_name: &str) -> Result<String, GfError> {
-        let ts = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        let path = format!("generated/{run_name}_{ts}.yaml");
-        self.save_to(&path)
-    }
-
-    /// Writes this collection to `path`, creating parent directories as needed.
-    ///
-    /// Returns `path` as a `String` on success.
-    ///
-    /// # Errors
-    ///
-    /// - [`GfError::IoError`] — directory creation or file write failed.
-    /// - [`GfError::ParseError`] — YAML serialization failed.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use gfcore::history::GameCollection;
-    ///
-    /// let col = GameCollection::new();
-    /// let path = col.save_to("/tmp/test_collection.yaml").expect("save must succeed");
-    /// assert_eq!(path, "/tmp/test_collection.yaml");
-    /// ```
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn save_to(&self, path: &str) -> Result<String, GfError> {
-        let yaml = self.to_yaml()?;
-        if let Some(parent) = std::path::Path::new(path).parent() {
-            if !parent.as_os_str().is_empty() {
-                std::fs::create_dir_all(parent).map_err(|e| GfError::IoError(e.to_string()))?;
-            }
-        }
-        std::fs::write(path, &yaml).map_err(|e| GfError::IoError(e.to_string()))?;
-        Ok(path.to_string())
-    }
+    // Filesystem persistence (`save`/`save_to`) lives in the `history::persist`
+    // adapter (feature `persistence`), keeping this kernel type free of I/O.
 }
 
 impl Default for GameCollection {
@@ -702,23 +645,5 @@ mod tests {
         assert!(yaml.contains("format_version"));
         assert!(yaml.contains("gfcore_version"));
         assert!(yaml.contains("games"));
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
-    #[test]
-    fn test_game_collection_save_to_temp_dir() {
-        let mut col = GameCollection::new();
-        col.push(make_record());
-        let path = std::env::temp_dir()
-            .join("gfcore_test_save_to.yaml")
-            .to_string_lossy()
-            .to_string();
-        let result = col.save_to(&path);
-        assert!(result.is_ok(), "save_to failed: {:?}", result);
-        assert!(std::path::Path::new(&path).exists());
-        let yaml = std::fs::read_to_string(&path).unwrap();
-        let loaded = GameCollection::from_yaml(&yaml).unwrap();
-        assert_eq!(col, loaded);
-        let _ = std::fs::remove_file(&path);
     }
 }
